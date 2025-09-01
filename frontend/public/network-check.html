@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CryptoVault - Network Diagnostics</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/ethers@6.4.0/dist/ethers.umd.min.js"></script>
+    <style>
+        .gradient-bg { background: linear-gradient(135deg, #0f0f23 0%, #1a1a40 50%, #2d1b69 100%); }
+        .glass-effect { backdrop-filter: blur(16px); background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); }
+    </style>
+</head>
+<body class="gradient-bg min-h-screen text-white">
+    <nav class="p-6 border-b border-white/10">
+        <div class="max-w-4xl mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-4">
+                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center">
+                    <span class="text-white font-bold text-xl">🔐</span>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-bold">CryptoVault</h1>
+                    <p class="text-sm text-gray-400">Network Diagnostics</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center space-x-4">
+                <a href="app.html" class="text-gray-300 hover:text-white transition-colors">🏠 Home</a>
+                <a href="vault.html" class="text-gray-300 hover:text-white transition-colors">🏦 Vaults</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-4xl mx-auto p-6">
+        <div class="text-center py-8 mb-8">
+            <h2 class="text-4xl font-bold mb-4 bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
+                Network & Wallet Diagnostics
+            </h2>
+            <p class="text-xl text-gray-300 mb-6">
+                Check your network connection and wallet status before making transactions
+            </p>
+            
+            <button id="runDiagnostics" class="bg-gradient-to-r from-cyan-500 to-blue-500 px-8 py-4 rounded-xl font-bold text-lg hover:shadow-2xl transition-all">
+                🔍 Run Diagnostics
+            </button>
+        </div>
+
+        <div class="space-y-6" id="diagnosticsResults">
+            <!-- Results will be populated here -->
+        </div>
+    </div>
+
+    <script>
+        let provider = null;
+        let signer = null;
+        let userAccount = '';
+
+        async function runDiagnostics() {
+            const resultsContainer = document.getElementById('diagnosticsResults');
+            resultsContainer.innerHTML = '';
+            
+            const btn = document.getElementById('runDiagnostics');
+            btn.textContent = '🔍 Running Diagnostics...';
+            btn.disabled = true;
+
+            try {
+                // Check 1: MetaMask Installation
+                addResult('🔍 检查 MetaMask 安装...', 'info');
+                if (typeof window.ethereum === 'undefined') {
+                    addResult('❌ MetaMask 未安装', 'error');
+                    addResult('💡 请先安装 MetaMask 扩展', 'warning');
+                    return;
+                } else {
+                    addResult('✅ MetaMask 已安装', 'success');
+                }
+
+                // Check 2: Wallet Connection
+                addResult('🔍 检查钱包连接...', 'info');
+                try {
+                    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                    if (accounts.length === 0) {
+                        addResult('❌ 钱包未连接', 'error');
+                        return;
+                    }
+                    userAccount = accounts[0];
+                    addResult(`✅ 钱包已连接: ${userAccount.slice(0, 10)}...${userAccount.slice(-8)}`, 'success');
+                } catch (error) {
+                    addResult('❌ 钱包连接失败: ' + error.message, 'error');
+                    return;
+                }
+
+                // Initialize provider and signer
+                provider = new ethers.BrowserProvider(window.ethereum);
+                signer = await provider.getSigner();
+
+                // Check 3: Network
+                addResult('🔍 检查网络配置...', 'info');
+                const network = await provider.getNetwork();
+                addResult(`📡 当前网络: ${network.name} (Chain ID: ${network.chainId})`, 'info');
+                
+                if (network.chainId === BigInt('11155111')) {
+                    addResult('✅ 已连接到 Sepolia 测试网', 'success');
+                } else {
+                    addResult('❌ 未连接到 Sepolia 测试网', 'error');
+                    addResult('💡 请在 MetaMask 中切换到 Sepolia 测试网', 'warning');
+                }
+
+                // Check 4: Balance
+                addResult('🔍 检查账户余额...', 'info');
+                const balance = await provider.getBalance(userAccount);
+                const ethBalance = parseFloat(ethers.formatEther(balance));
+                addResult(`💰 账户余额: ${ethBalance.toFixed(6)} ETH`, 'info');
+                
+                if (ethBalance >= 0.002) {
+                    addResult('✅ 余额充足，可以进行交易', 'success');
+                } else if (ethBalance >= 0.001) {
+                    addResult('⚠️ 余额较低，建议充值更多测试 ETH', 'warning');
+                } else {
+                    addResult('❌ 余额不足，无法进行交易', 'error');
+                    addResult('💡 请从 Sepolia 测试水龙头获取测试 ETH', 'warning');
+                }
+
+                // Check 5: Gas Price
+                addResult('🔍 检查 Gas 价格...', 'info');
+                try {
+                    const gasPrice = await provider.getFeeData();
+                    const gasPriceGwei = parseFloat(ethers.formatUnits(gasPrice.gasPrice, 'gwei'));
+                    addResult(`⛽ 当前 Gas 价格: ${gasPriceGwei.toFixed(2)} Gwei`, 'info');
+                    
+                    if (gasPriceGwei < 50) {
+                        addResult('✅ Gas 价格正常', 'success');
+                    } else {
+                        addResult('⚠️ Gas 价格较高，交易成本可能增加', 'warning');
+                    }
+                } catch (error) {
+                    addResult('⚠️ 无法获取 Gas 价格信息', 'warning');
+                }
+
+                // Check 6: Test Transaction (Estimate Only)
+                addResult('🔍 测试交易预估...', 'info');
+                try {
+                    const testTx = {
+                        to: userAccount,
+                        value: ethers.parseEther('0.001')
+                    };
+                    
+                    const estimatedGas = await signer.estimateGas(testTx);
+                    const feeData = await provider.getFeeData();
+                    const estimatedCost = estimatedGas * (feeData.gasPrice || BigInt('20000000000'));
+                    const costInEth = parseFloat(ethers.formatEther(estimatedCost));
+                    
+                    addResult(`📊 预估交易 Gas: ${estimatedGas.toString()}`, 'info');
+                    addResult(`💸 预估交易成本: ${costInEth.toFixed(8)} ETH`, 'info');
+                    
+                    if (ethBalance > (0.001 + costInEth)) {
+                        addResult('✅ 可以成功执行交易', 'success');
+                    } else {
+                        addResult('❌ 余额不足以支付交易和 Gas 费用', 'error');
+                    }
+                } catch (error) {
+                    addResult('⚠️ 交易预估失败: ' + error.message, 'warning');
+                }
+
+                // Final Summary
+                addResult('📋 诊断完成', 'info');
+                if (network.chainId === BigInt('11155111') && ethBalance >= 0.002) {
+                    addResult('🎉 您的设置正确，可以正常使用所有功能！', 'success');
+                } else {
+                    addResult('⚠️ 请根据上述建议调整设置后再进行交易', 'warning');
+                }
+
+            } catch (error) {
+                addResult('❌ 诊断过程中出现错误: ' + error.message, 'error');
+            } finally {
+                btn.textContent = '🔍 Run Diagnostics';
+                btn.disabled = false;
+            }
+        }
+
+        function addResult(message, type = 'info') {
+            const resultsContainer = document.getElementById('diagnosticsResults');
+            
+            const colors = {
+                success: 'border-green-500 bg-green-500/10',
+                error: 'border-red-500 bg-red-500/10',
+                warning: 'border-yellow-500 bg-yellow-500/10',
+                info: 'border-cyan-500 bg-cyan-500/10'
+            };
+            
+            const textColors = {
+                success: 'text-green-400',
+                error: 'text-red-400', 
+                warning: 'text-yellow-400',
+                info: 'text-cyan-400'
+            };
+            
+            const result = document.createElement('div');
+            result.className = `glass-effect rounded-lg p-4 border ${colors[type]}`;
+            result.innerHTML = `<p class="${textColors[type]} font-medium">${message}</p>`;
+            
+            resultsContainer.appendChild(result);
+            
+            // Auto scroll to latest result
+            result.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        // Event listeners
+        document.getElementById('runDiagnostics').addEventListener('click', runDiagnostics);
+
+        // Auto-run diagnostics on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(() => {
+                document.getElementById('runDiagnostics').click();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

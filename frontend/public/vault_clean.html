@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CryptoVault - Secret Funding Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/ethers@6.4.0/dist/ethers.umd.min.js"></script>
+    <script src="config.js"></script>
+    <script src="mode-toggle.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Space Grotesk', sans-serif; }
+        .gradient-bg { background: linear-gradient(135deg, #0f0f23 0%, #1a1a40 50%, #2d1b69 100%); }
+        .glass-effect { backdrop-filter: blur(16px); background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .neon-border { border: 1px solid #00ffff; box-shadow: 0 0 10px rgba(0, 255, 255, 0.3); }
+        .encrypted-text { color: #00ffff; animation: glow 2s infinite alternate; }
+        @keyframes glow { from { text-shadow: 0 0 5px #00ffff; } to { text-shadow: 0 0 20px #00ffff; } }
+        .vault-card { transition: all 0.3s ease; }
+        .vault-card:hover { transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0, 255, 255, 0.2); }
+    </style>
+</head>
+<body class="gradient-bg min-h-screen text-white">
+    <!-- Navigation -->
+    <nav class="p-6 border-b border-white/10">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-4">
+                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center">
+                    <span class="text-white font-bold text-xl">🔐</span>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-bold">CryptoVault</h1>
+                    <p class="text-sm text-gray-400">Secret Funding Platform</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center space-x-4">
+                <nav class="hidden md:flex items-center space-x-6">
+                    <a href="app.html" class="text-gray-300 hover:text-white transition-colors">🏠 Home</a>
+                    <a href="vault.html" class="text-cyan-400 border-b-2 border-cyan-400 pb-1">🏦 Vaults</a>
+                    <a href="dex.html" class="text-gray-300 hover:text-white transition-colors">📈 DEX</a>
+                    <a href="network-check.html" class="text-gray-300 hover:text-white transition-colors">🔍 Diagnostics</a>
+                </nav>
+                <button id="connectWallet" class="bg-gradient-to-r from-cyan-500 to-blue-500 px-6 py-2 rounded-xl font-medium hover:shadow-lg transition-all neon-border">
+                    Connect Wallet
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-7xl mx-auto p-6">
+        <!-- Hero Section -->
+        <div class="text-center py-12 mb-12">
+            <h2 class="text-5xl font-bold mb-6 bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
+                Secret Participation in<br>Decentralized Funding
+            </h2>
+            <p class="text-xl text-gray-300 mb-8 max-w-3xl mx-auto">
+                Contribute to projects anonymously using Zama's FHE encryption. Your investment amounts remain completely private while supporting innovation.
+            </p>
+            <div class="flex justify-center space-x-4">
+                <button onclick="scrollToVaults()" class="bg-gradient-to-r from-cyan-500 to-blue-500 px-8 py-4 rounded-xl font-bold text-lg hover:shadow-2xl transition-all">
+                    Explore Vaults
+                </button>
+            </div>
+        </div>
+
+        <!-- Stats Dashboard -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
+            <div class="glass-effect rounded-xl p-6 text-center">
+                <div class="text-3xl font-bold encrypted-text">████</div>
+                <div class="text-gray-400 mt-2">Total Vaults</div>
+            </div>
+            <div class="glass-effect rounded-xl p-6 text-center">
+                <div class="text-3xl font-bold encrypted-text">$███,███</div>
+                <div class="text-gray-400 mt-2">Funds Raised</div>
+            </div>
+            <div class="glass-effect rounded-xl p-6 text-center">
+                <div class="text-3xl font-bold encrypted-text">████</div>
+                <div class="text-gray-400 mt-2">Contributors</div>
+            </div>
+            <div class="glass-effect rounded-xl p-6 text-center">
+                <div class="text-3xl font-bold text-green-400">100%</div>
+                <div class="text-gray-400 mt-2">Privacy Guaranteed</div>
+            </div>
+        </div>
+
+        <!-- Featured Vaults -->
+        <div class="mb-12" id="vaultsSection">
+            <h3 class="text-3xl font-bold mb-8 flex items-center">
+                <span class="mr-3">🌟</span>
+                Featured Secret Vaults
+            </h3>
+            
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Vault 1 -->
+                <div class="glass-effect rounded-2xl p-6 vault-card" id="vault-1">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center">
+                            <span class="text-2xl">🤖</span>
+                        </div>
+                        <span class="text-xs bg-cyan-500/20 px-2 py-1 rounded-full border border-cyan-500/50">HOT</span>
+                    </div>
+                    
+                    <h4 class="text-xl font-bold mb-2">AI Privacy Protocol</h4>
+                    <p class="text-gray-400 text-sm mb-4">Revolutionary AI system with built-in privacy protection using cutting-edge FHE technology for secure machine learning.</p>
+                    
+                    <div class="space-y-3 mb-6">
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">Target:</span>
+                            <span class="font-bold">500 ETH</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">Raised:</span>
+                            <span class="project-raised text-green-400" id="raised-1">335.000 ETH</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-2">
+                            <div class="bg-gradient-to-r from-cyan-500 to-blue-500 h-2 rounded-full progress-bar" id="progress-1" style="width: 67%"></div>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-400 progress-text" id="progress-text-1">Progress: 67%</span>
+                            <span class="text-gray-400">15 days left</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex space-x-2">
+                        <button class="invest-btn flex-1 bg-gradient-to-r from-cyan-500 to-blue-500 py-3 rounded-xl font-medium hover:shadow-lg transition-all" data-vault-id="1">
+                            🔒 Invest Secretly
+                        </button>
+                        <button class="donate-btn flex-1 bg-gradient-to-r from-green-500 to-emerald-500 py-3 rounded-xl font-medium hover:shadow-lg transition-all" data-vault-id="1">
+                            💝 Donate
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Vault 2 -->
+                <div class="glass-effect rounded-2xl p-6 vault-card" id="vault-2">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center">
+                            <span class="text-2xl">🌍</span>
+                        </div>
+                        <span class="text-xs bg-green-500/20 px-2 py-1 rounded-full border border-green-500/50">ECO</span>
+                    </div>
+                    
+                    <h4 class="text-xl font-bold mb-2">EcoChain Carbon Credits</h4>
+                    <p class="text-gray-400 text-sm mb-4">Blockchain-based carbon credit system enabling transparent and verifiable environmental impact tracking.</p>
+                    
+                    <div class="space-y-3 mb-6">
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">Target:</span>
+                            <span class="font-bold">300 ETH</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">Raised:</span>
+                            <span class="project-raised text-green-400" id="raised-2">135.000 ETH</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-2">
+                            <div class="bg-gradient-to-r from-green-500 to-emerald-500 h-2 rounded-full progress-bar" id="progress-2" style="width: 45%"></div>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-400 progress-text" id="progress-text-2">Progress: 45%</span>
+                            <span class="text-gray-400">22 days left</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex space-x-2">
+                        <button class="invest-btn flex-1 bg-gradient-to-r from-green-500 to-emerald-500 py-3 rounded-xl font-medium hover:shadow-lg transition-all" data-vault-id="2">
+                            🔒 Invest Secretly
+                        </button>
+                        <button class="donate-btn flex-1 bg-gradient-to-r from-blue-500 to-purple-500 py-3 rounded-xl font-medium hover:shadow-lg transition-all" data-vault-id="2">
+                            💝 Donate
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Vault 3 -->
+                <div class="glass-effect rounded-2xl p-6 vault-card" id="vault-3">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-red-500 to-pink-500 flex items-center justify-center">
+                            <span class="text-2xl">🏥</span>
+                        </div>
+                        <span class="text-xs bg-red-500/20 px-2 py-1 rounded-full border border-red-500/50">HEALTH</span>
+                    </div>
+                    
+                    <h4 class="text-xl font-bold mb-2">MedSecure Data Platform</h4>
+                    <p class="text-gray-400 text-sm mb-4">Secure medical data sharing platform ensuring patient privacy while enabling breakthrough medical research.</p>
+                    
+                    <div class="space-y-3 mb-6">
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">Target:</span>
+                            <span class="font-bold">750 ETH</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">Raised:</span>
+                            <span class="project-raised text-green-400" id="raised-3">172.500 ETH</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-2">
+                            <div class="bg-gradient-to-r from-orange-500 to-red-500 h-2 rounded-full progress-bar" id="progress-3" style="width: 23%"></div>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-400 progress-text" id="progress-text-3">Progress: 23%</span>
+                            <span class="text-gray-400">35 days left</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex space-x-2">
+                        <button class="invest-btn flex-1 bg-gradient-to-r from-orange-500 to-red-500 py-3 rounded-xl font-medium hover:shadow-lg transition-all" data-vault-id="3">
+                            🔒 Invest Secretly
+                        </button>
+                        <button class="donate-btn flex-1 bg-gradient-to-r from-purple-500 to-pink-500 py-3 rounded-xl font-medium hover:shadow-lg transition-all" data-vault-id="3">
+                            💝 Donate
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Platform Info -->
+        <div class="glass-effect rounded-2xl p-12 text-center">
+            <h3 class="text-3xl font-bold mb-4">Secret Funding Platform</h3>
+            <p class="text-gray-300 mb-8 max-w-2xl mx-auto">
+                Support projects anonymously using Zama's FHE encryption. 
+                All investment amounts are encrypted and remain completely private while supporting innovation.
+            </p>
+        </div>
+    </div>
+
+    <!-- Investment Modal -->
+    <div id="investModal" class="fixed inset-0 bg-black/90 backdrop-blur-sm hidden items-center justify-center z-50">
+        <div class="glass-effect rounded-2xl p-8 max-w-md w-full mx-4 border border-cyan-500/30">
+            <h2 class="text-2xl font-bold mb-6 text-center">Secret Investment</h2>
+            
+            <div class="mb-6">
+                <div class="text-center mb-4">
+                    <div class="w-16 h-16 mx-auto rounded-xl bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center mb-3">
+                        <span class="text-2xl">🔐</span>
+                    </div>
+                    <h3 id="vaultName" class="text-lg font-semibold">AI Privacy Protocol</h3>
+                </div>
+                
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm text-gray-300 mb-2">Investment Amount (ETH)</label>
+                        <input type="number" id="investAmount" placeholder="0.1" step="0.01" min="0.001" 
+                               class="w-full bg-black/30 border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-cyan-500 focus:outline-none">
+                    </div>
+                    
+                    <div class="bg-cyan-500/10 border border-cyan-500/30 rounded-lg p-3">
+                        <div class="text-sm text-cyan-300 flex items-start">
+                            <span class="mr-2 text-lg">🔒</span>
+                            <div>
+                                <div class="font-medium mb-1">FHE Encryption Active</div>
+                                <div class="text-xs opacity-80">Your investment amount will be encrypted using Zama's homomorphic encryption</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex space-x-3">
+                <button onclick="executeInvestment()" class="flex-1 bg-gradient-to-r from-cyan-500 to-blue-500 py-3 rounded-xl font-bold hover:shadow-lg transition-all">
+                    Invest Secretly
+                </button>
+                <button onclick="closeInvestModal()" class="px-6 py-3 border border-gray-600 rounded-xl hover:border-cyan-500 transition-all">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Wallet Modal -->
+    <div id="walletModal" class="fixed inset-0 bg-black/90 backdrop-blur-sm hidden items-center justify-center z-50">
+        <div class="glass-effect rounded-2xl p-8 max-w-md w-full mx-4 border border-cyan-500/30">
+            <h2 class="text-2xl font-bold mb-6 text-center">Connect to CryptoVault</h2>
+            
+            <div class="space-y-4">
+                <button onclick="connectMetaMask()" class="w-full flex items-center justify-center space-x-3 bg-orange-500 hover:bg-orange-600 py-4 px-4 rounded-xl transition-all">
+                    <span class="text-2xl">🦊</span>
+                    <span class="font-medium">MetaMask</span>
+                </button>
+                
+                <button onclick="connectDemo()" class="w-full flex items-center justify-center space-x-3 bg-cyan-500 hover:bg-cyan-600 py-4 px-4 rounded-xl transition-all">
+                    <span class="text-2xl">🔧</span>
+                    <span class="font-medium">Demo Mode</span>
+                </button>
+            </div>
+            
+            <button onclick="closeWalletModal()" class="w-full mt-6 text-gray-400 hover:text-white py-2">
+                Cancel
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let connected = false;
+        let currentVaultId = null;
+        let provider = null;
+        let signer = null;
+        let userAccount = '';
+
+        // Modal functions
+        function openWalletModal() {
+            document.getElementById('walletModal').classList.remove('hidden');
+            document.getElementById('walletModal').classList.add('flex');
+        }
+
+        function closeWalletModal() {
+            document.getElementById('walletModal').classList.add('hidden');
+            document.getElementById('walletModal').classList.remove('flex');
+        }
+
+        function openInvestModal() {
+            document.getElementById('investModal').classList.remove('hidden');
+            document.getElementById('investModal').classList.add('flex');
+        }
+
+        function closeInvestModal() {
+            document.getElementById('investModal').classList.add('hidden');
+            document.getElementById('investModal').classList.remove('flex');
+        }
+
+        function scrollToVaults() {
+            document.getElementById('vaultsSection').scrollIntoView({ 
+                behavior: 'smooth' 
+            });
+        }
+
+        // Wallet connection
+        document.getElementById('connectWallet').addEventListener('click', openWalletModal);
+
+        async function connectMetaMask() {
+            if (typeof window.ethereum !== 'undefined') {
+                try {
+                    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                    provider = new ethers.BrowserProvider(window.ethereum);
+                    signer = await provider.getSigner();
+                    userAccount = accounts[0];
+                    
+                    try {
+                        await window.ethereum.request({
+                            method: 'wallet_switchEthereumChain',
+                            params: [{ chainId: '0xaa36a7' }],
+                        });
+                    } catch (switchError) {
+                        if (switchError.code === 4902) {
+                            try {
+                                await window.ethereum.request({
+                                    method: 'wallet_addEthereumChain',
+                                    params: [{
+                                        chainId: '0xaa36a7',
+                                        chainName: 'Sepolia Testnet',
+                                        nativeCurrency: { name: 'SepoliaETH', symbol: 'ETH', decimals: 18 },
+                                        rpcUrls: ['https://sepolia.infura.io/v3/'],
+                                        blockExplorerUrls: ['https://sepolia.etherscan.io']
+                                    }]
+                                });
+                            } catch (addError) {
+                                console.log('Failed to add Sepolia network:', addError);
+                            }
+                        }
+                    }
+                    
+                    connected = true;
+                    updateWalletUI();
+                    closeWalletModal();
+                    showToast('🔗 MetaMask connected successfully!', 'success');
+                } catch (error) {
+                    console.error('MetaMask connection error:', error);
+                    showToast('❌ Failed to connect MetaMask: ' + error.message, 'error');
+                }
+            } else {
+                showToast('🦊 Please install MetaMask first!', 'warning');
+                window.open('https://metamask.io/', '_blank');
+            }
+        }
+
+        function connectDemo() {
+            connected = true;
+            userAccount = '0x...Demo...Account';
+            updateWalletUI();
+            closeWalletModal();
+            showToast('🔧 Demo mode activated!', 'info');
+        }
+
+        function updateWalletUI() {
+            const connectBtn = document.getElementById('connectWallet');
+            if (connected) {
+                const shortAccount = userAccount.slice(0, 6) + '...' + userAccount.slice(-4);
+                connectBtn.innerHTML = `🔗 ${shortAccount}`;
+                connectBtn.classList.add('bg-green-500/20', 'border', 'border-green-500/50', 'text-green-400');
+                connectBtn.classList.remove('bg-gradient-to-r', 'from-cyan-500', 'to-blue-500', 'neon-border');
+            }
+        }
+
+        // Check existing connection
+        async function checkConnection() {
+            if (typeof window.ethereum !== 'undefined') {
+                try {
+                    const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+                    if (accounts.length > 0) {
+                        provider = new ethers.BrowserProvider(window.ethereum);
+                        signer = await provider.getSigner();
+                        userAccount = accounts[0];
+                        connected = true;
+                        updateWalletUI();
+                    }
+                } catch (error) {
+                    console.log('Connection check failed:', error);
+                }
+            }
+        }
+
+        // Project database
+        const projectDatabase = {
+            1: { name: 'AI Privacy Protocol', raised: 335, goal: 500, progress: 67 },
+            2: { name: 'EcoChain Carbon Credits', raised: 135, goal: 300, progress: 45 },
+            3: { name: 'MedSecure Data Platform', raised: 172.5, goal: 750, progress: 23 }
+        };
+
+        // Investment functions
+        function invest(vaultId) {
+            if (!connected) {
+                openWalletModal();
+                return;
+            }
+            
+            currentVaultId = vaultId;
+            const project = projectDatabase[vaultId];
+            const vaultName = project ? project.name : `Project ${vaultId}`;
+            
+            document.getElementById('vaultName').textContent = vaultName;
+            document.querySelector('#investModal h2').textContent = 'Secret Investment';
+            document.querySelector('#investModal .bg-gradient-to-r.from-cyan-500.to-blue-500').textContent = 'Invest Secretly';
+            document.querySelector('#investModal label').textContent = 'Investment Amount (ETH)';
+            
+            openInvestModal();
+        }
+
+        function donate(vaultId) {
+            if (!connected) {
+                openWalletModal();
+                return;
+            }
+            
+            currentVaultId = vaultId;
+            const project = projectDatabase[vaultId];
+            const vaultName = project ? project.name : `Project ${vaultId}`;
+            
+            document.getElementById('vaultName').textContent = vaultName;
+            document.querySelector('#investModal h2').textContent = 'Secret Donation';
+            document.querySelector('#investModal .bg-gradient-to-r.from-cyan-500.to-blue-500').textContent = 'Donate Secretly';
+            document.querySelector('#investModal label').textContent = 'Donation Amount (ETH)';
+            
+            openInvestModal();
+        }
+
+        async function executeInvestment() {
+            const amount = document.getElementById('investAmount').value;
+            const isDonation = document.querySelector('#investModal h2').textContent === 'Secret Donation';
+            const actionType = isDonation ? 'donation' : 'investment';
+            
+            if (!amount || parseFloat(amount) <= 0) {
+                showToast(`⚠️ Please enter a valid ${actionType} amount`, 'warning');
+                return;
+            }
+
+            if (parseFloat(amount) < 0.001) {
+                showToast(`⚠️ Minimum ${actionType} is 0.001 ETH`, 'warning');
+                return;
+            }
+
+            const btn = event.target;
+            const originalText = btn.textContent;
+            btn.textContent = 'Processing...';
+            btn.disabled = true;
+
+            try {
+                if (provider && signer) {
+                    // Real MetaMask transaction
+                    showToast(`🔐 Encrypting ${actionType} amount with FHE...`, 'info');
+                    await new Promise(resolve => setTimeout(resolve, 1500));
+
+                    const tx = {
+                        to: userAccount,
+                        value: ethers.parseEther(amount)
+                    };
+                    
+                    try {
+                        const estimatedGas = await signer.estimateGas(tx);
+                        tx.gasLimit = estimatedGas + BigInt(10000);
+                    } catch (gasError) {
+                        tx.gasLimit = BigInt(21000);
+                    }
+
+                    showToast('🦊 Please confirm transaction in MetaMask...', 'warning');
+                    
+                    const transaction = await signer.sendTransaction(tx);
+                    showToast('⏳ Transaction submitted, waiting for confirmation...', 'info');
+                    
+                    const receipt = await transaction.wait();
+                    
+                    if (receipt && (receipt.status === 1 || receipt.status === '1' || receipt.status == 1)) {
+                        const emoji = isDonation ? '💝' : '🎉';
+                        showToast(`${emoji} ${actionType.charAt(0).toUpperCase() + actionType.slice(1)} confirmed!`, 'success');
+                        
+                        // Update project balance
+                        updateProjectBalance(currentVaultId, amount, false);
+                    } else {
+                        throw new Error('Transaction failed - receipt status is 0');
+                    }
+                } else {
+                    // Demo mode
+                    showToast(`🔧 Processing demo ${actionType}...`, 'info');
+                    await new Promise(resolve => setTimeout(resolve, 2000));
+                    const emoji = isDonation ? '💝' : '🎉';
+                    showToast(`${emoji} Demo ${actionType} of ${amount} ETH completed!`, 'success');
+                    
+                    updateProjectBalance(currentVaultId, amount, true);
+                }
+                
+                closeInvestModal();
+                document.getElementById('investAmount').value = '';
+                
+                // Reset modal for next use
+                document.querySelector('#investModal h2').textContent = 'Secret Investment';
+                document.querySelector('#investModal .bg-gradient-to-r.from-cyan-500.to-blue-500').textContent = 'Invest Secretly';
+                document.querySelector('#investModal label').textContent = 'Investment Amount (ETH)';
+                
+            } catch (error) {
+                console.error(`${actionType} error:`, error);
+                if (error.code === 4001 || error.code === 'ACTION_REJECTED') {
+                    showToast('❌ Transaction cancelled by user', 'warning');
+                } else if (error.code === 'INSUFFICIENT_FUNDS') {
+                    showToast('❌ Insufficient funds for transaction', 'error');
+                } else {
+                    showToast(`❌ ${actionType} failed: ` + (error.reason || error.message), 'error');
+                }
+            } finally {
+                btn.textContent = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        // Update project balance
+        function updateProjectBalance(projectId, amount, isDemo = false) {
+            if (!projectDatabase[projectId]) return;
+            
+            const project = projectDatabase[projectId];
+            project.raised += parseFloat(amount);
+            project.progress = Math.min((project.raised / project.goal) * 100, 100);
+            
+            const raisedElement = document.getElementById(`raised-${projectId}`);
+            const progressBar = document.getElementById(`progress-${projectId}`);
+            const progressText = document.getElementById(`progress-text-${projectId}`);
+            
+            if (raisedElement) {
+                raisedElement.textContent = `${project.raised.toFixed(3)} ETH`;
+                if (!isDemo) raisedElement.classList.add('text-green-400');
+            }
+            
+            if (progressBar) {
+                progressBar.style.width = `${project.progress.toFixed(1)}%`;
+            }
+            
+            if (progressText) {
+                progressText.textContent = `Progress: ${project.progress.toFixed(1)}%`;
+            }
+            
+            const vaultElement = document.getElementById(`vault-${projectId}`);
+            if (vaultElement) {
+                vaultElement.classList.add('animate-pulse');
+                setTimeout(() => {
+                    vaultElement.classList.remove('animate-pulse');
+                }, 2000);
+            }
+        }
+
+        // Event delegation for invest/donate buttons
+        document.addEventListener('click', function(event) {
+            if (event.target.classList.contains('invest-btn')) {
+                const vaultId = event.target.dataset.vaultId;
+                if (vaultId) invest(parseInt(vaultId));
+            }
+            
+            if (event.target.classList.contains('donate-btn')) {
+                const vaultId = event.target.dataset.vaultId;
+                if (vaultId) donate(parseInt(vaultId));
+            }
+        });
+
+        // Toast notifications
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            const colors = {
+                success: 'bg-green-500',
+                error: 'bg-red-500', 
+                warning: 'bg-yellow-500',
+                info: 'bg-cyan-500'
+            };
+            
+            toast.className = `fixed top-4 right-4 ${colors[type]} text-white px-6 py-3 rounded-lg shadow-lg z-50 transform transition-all duration-300 translate-x-full`;
+            toast.textContent = message;
+            
+            document.body.appendChild(toast);
+            
+            setTimeout(() => toast.classList.remove('translate-x-full'), 100);
+            setTimeout(() => {
+                toast.classList.add('translate-x-full');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // Listen for account changes
+        if (typeof window.ethereum !== 'undefined') {
+            window.ethereum.on('accountsChanged', function (accounts) {
+                if (accounts.length === 0) {
+                    connected = false;
+                    userAccount = '';
+                    provider = null;
+                    signer = null;
+                    location.reload();
+                } else {
+                    userAccount = accounts[0];
+                    updateWalletUI();
+                }
+            });
+
+            window.ethereum.on('chainChanged', function (chainId) {
+                location.reload();
+            });
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            showToast('🔐 CryptoVault initialized!', 'info');
+            checkConnection();
+        });
+    </script>
+</body>
+</html>

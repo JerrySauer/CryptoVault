@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔧 CryptoVault 交易调试工具</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/ethers@6.4.0/dist/ethers.umd.min.js"></script>
+    <script src="config.js"></script>
+    <style>
+        body { font-family: 'Arial', sans-serif; }
+        .gradient-bg { background: linear-gradient(135deg, #0f0f23 0%, #1a1a40 50%, #2d1b69 100%); }
+        .glass-effect { backdrop-filter: blur(16px); background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .debug-code { font-family: 'Courier New', monospace; font-size: 12px; }
+    </style>
+</head>
+<body class="gradient-bg min-h-screen text-white">
+    <!-- Navigation -->
+    <nav class="p-6 border-b border-white/10">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-4">
+                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-red-500 to-orange-600 flex items-center justify-center">
+                    <span class="text-white font-bold text-xl">🔧</span>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-bold">交易调试工具</h1>
+                    <p class="text-sm text-gray-400">CryptoVault Debug Console</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center space-x-6">
+                <nav class="hidden md:flex items-center space-x-6">
+                    <a href="app.html" class="text-gray-300 hover:text-white transition-colors">🏠 Home</a>
+                    <a href="vault.html" class="text-gray-300 hover:text-white transition-colors">🏦 Vaults</a>
+                    <a href="dex.html" class="text-gray-300 hover:text-white transition-colors">📈 DEX</a>
+                    <a href="metamask-test.html" class="text-gray-300 hover:text-white transition-colors">🦊 Test</a>
+                    <a href="debug-transactions.html" class="text-cyan-400 border-b-2 border-cyan-400 pb-1">🔧 Debug</a>
+                </nav>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-7xl mx-auto p-6">
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold mb-4">🔧 交易调试控制台</h1>
+            <p class="text-gray-300">诊断和修复 CryptoVault 交易问题</p>
+        </div>
+
+        <!-- 系统状态检查 -->
+        <div class="glass-effect rounded-2xl p-6 mb-8">
+            <h2 class="text-2xl font-bold mb-4 flex items-center">
+                <span class="mr-3">📊</span>系统状态检查
+            </h2>
+            <div class="grid md:grid-cols-3 gap-4">
+                <div class="bg-black/20 rounded-lg p-4">
+                    <div class="text-sm text-gray-400">MetaMask 状态</div>
+                    <div id="metamaskStatus" class="text-lg font-bold">检查中...</div>
+                </div>
+                <div class="bg-black/20 rounded-lg p-4">
+                    <div class="text-sm text-gray-400">网络状态</div>
+                    <div id="networkStatus" class="text-lg font-bold">检查中...</div>
+                </div>
+                <div class="bg-black/20 rounded-lg p-4">
+                    <div class="text-sm text-gray-400">账户余额</div>
+                    <div id="balanceStatus" class="text-lg font-bold">检查中...</div>
+                </div>
+            </div>
+            <button id="checkSystemBtn" class="mt-4 bg-blue-500 hover:bg-blue-600 px-6 py-3 rounded-xl font-medium">
+                🔄 刷新系统状态
+            </button>
+        </div>
+
+        <!-- 合约地址验证 -->
+        <div class="glass-effect rounded-2xl p-6 mb-8">
+            <h2 class="text-2xl font-bold mb-4 flex items-center">
+                <span class="mr-3">🏗️</span>合约地址验证
+            </h2>
+            <div class="grid md:grid-cols-2 gap-4 debug-code">
+                <div class="bg-black/20 rounded-lg p-4">
+                    <div class="text-sm text-gray-400 mb-2">FHEVM_EXECUTOR</div>
+                    <div class="text-green-400" id="fhevm-addr">0x848B0066793BcC60346Da1F49049357399B8D595</div>
+                </div>
+                <div class="bg-black/20 rounded-lg p-4">
+                    <div class="text-sm text-gray-400 mb-2">KMS_VERIFIER (创建项目)</div>
+                    <div class="text-green-400" id="kms-addr">0x1364cBBf2cDF5032C47d8226a6f6FBD2AFCDacAC</div>
+                </div>
+                <div class="bg-black/20 rounded-lg p-4">
+                    <div class="text-sm text-gray-400 mb-2">HCU_LIMIT (投资)</div>
+                    <div class="text-green-400" id="hcu-addr">0x594BB474275918AF9609814E68C61B1587c5F838</div>
+                </div>
+                <div class="bg-black/20 rounded-lg p-4">
+                    <div class="text-sm text-gray-400 mb-2">ACL_CONTRACT (DEX)</div>
+                    <div class="text-green-400" id="acl-addr">0x687820221192C5B662b25367F70076A37bc79b6c</div>
+                </div>
+            </div>
+            <button id="verifyContractsBtn" class="mt-4 bg-purple-500 hover:bg-purple-600 px-6 py-3 rounded-xl font-medium">
+                ✅ 验证合约可访问性
+            </button>
+        </div>
+
+        <!-- 创建项目调试 -->
+        <div class="glass-effect rounded-2xl p-6 mb-8">
+            <h2 class="text-2xl font-bold mb-4 flex items-center">
+                <span class="mr-3">🚀</span>创建项目调试
+            </h2>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm text-gray-300 mb-2">项目名称</label>
+                    <input type="text" id="debugProjectName" value="测试项目" 
+                           class="w-full bg-black/30 border border-gray-600 rounded-lg px-4 py-3 text-white">
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-300 mb-2">创建费用 (ETH)</label>
+                    <input type="number" id="debugCreationFee" value="0.002" step="0.001" 
+                           class="w-full bg-black/30 border border-gray-600 rounded-lg px-4 py-3 text-white">
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-300 mb-2">Gas Limit</label>
+                    <input type="number" id="debugGasLimit" value="300000" 
+                           class="w-full bg-black/30 border border-gray-600 rounded-lg px-4 py-3 text-white">
+                </div>
+            </div>
+            <div class="flex space-x-4 mt-6">
+                <button id="debugCreateBtn" class="bg-green-500 hover:bg-green-600 px-6 py-3 rounded-xl font-medium">
+                    🧪 调试创建交易
+                </button>
+                <button id="estimateGasBtn" class="bg-orange-500 hover:bg-orange-600 px-6 py-3 rounded-xl font-medium">
+                    ⛽ 估算 Gas
+                </button>
+            </div>
+        </div>
+
+        <!-- 实时日志 -->
+        <div class="glass-effect rounded-2xl p-6">
+            <h2 class="text-2xl font-bold mb-4 flex items-center">
+                <span class="mr-3">📝</span>调试日志
+                <button id="clearLogBtn" class="ml-auto text-sm bg-red-500 hover:bg-red-600 px-3 py-1 rounded">
+                    清除
+                </button>
+            </h2>
+            <div id="debugLog" class="bg-black/40 rounded-lg p-4 h-96 overflow-y-auto debug-code text-sm">
+                <div class="text-cyan-400">[系统] 调试工具已加载</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let provider, signer, connected = false;
+        let userAccount = '';
+
+        // 日志函数
+        function addLog(message, type = 'info') {
+            const logDiv = document.getElementById('debugLog');
+            const timestamp = new Date().toLocaleTimeString();
+            const colors = {
+                info: 'text-white',
+                success: 'text-green-400',
+                warning: 'text-yellow-400',
+                error: 'text-red-400',
+                debug: 'text-cyan-400'
+            };
+            
+            const logEntry = document.createElement('div');
+            logEntry.className = colors[type] || 'text-white';
+            logEntry.innerHTML = `<span class="text-gray-400">[${timestamp}]</span> ${message}`;
+            
+            logDiv.appendChild(logEntry);
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        // 清除日志
+        document.getElementById('clearLogBtn').addEventListener('click', function() {
+            document.getElementById('debugLog').innerHTML = '<div class="text-cyan-400">[系统] 日志已清除</div>';
+        });
+
+        // 系统状态检查
+        async function checkSystemStatus() {
+            addLog('开始系统状态检查...', 'debug');
+            
+            // 检查 MetaMask
+            if (typeof window.ethereum !== 'undefined') {
+                document.getElementById('metamaskStatus').innerHTML = '✅ 已安装';
+                document.getElementById('metamaskStatus').className = 'text-lg font-bold text-green-400';
+                addLog('MetaMask: 已检测到', 'success');
+                
+                try {
+                    const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+                    if (accounts.length > 0) {
+                        provider = new ethers.BrowserProvider(window.ethereum);
+                        signer = await provider.getSigner();
+                        userAccount = accounts[0];
+                        connected = true;
+                        
+                        // 检查网络
+                        const network = await provider.getNetwork();
+                        if (network.chainId.toString() === '11155111') {
+                            document.getElementById('networkStatus').innerHTML = '✅ Sepolia';
+                            document.getElementById('networkStatus').className = 'text-lg font-bold text-green-400';
+                            addLog(`网络: Sepolia (${network.chainId})`, 'success');
+                        } else {
+                            document.getElementById('networkStatus').innerHTML = `❌ 错误网络 (${network.chainId})`;
+                            document.getElementById('networkStatus').className = 'text-lg font-bold text-red-400';
+                            addLog(`网络错误: 当前网络 ${network.chainId}, 需要 Sepolia (11155111)`, 'error');
+                        }
+                        
+                        // 检查余额
+                        const balance = await provider.getBalance(accounts[0]);
+                        const balanceEth = ethers.formatEther(balance);
+                        document.getElementById('balanceStatus').innerHTML = `${parseFloat(balanceEth).toFixed(4)} ETH`;
+                        
+                        if (parseFloat(balanceEth) > 0.01) {
+                            document.getElementById('balanceStatus').className = 'text-lg font-bold text-green-400';
+                            addLog(`账户余额: ${balanceEth} ETH (充足)`, 'success');
+                        } else {
+                            document.getElementById('balanceStatus').className = 'text-lg font-bold text-yellow-400';
+                            addLog(`账户余额: ${balanceEth} ETH (可能不足)`, 'warning');
+                        }
+                        
+                        addLog(`连接账户: ${accounts[0]}`, 'info');
+                        
+                    } else {
+                        document.getElementById('networkStatus').innerHTML = '❌ 未连接';
+                        document.getElementById('balanceStatus').innerHTML = '❌ 未连接';
+                        addLog('MetaMask: 已安装但未连接', 'warning');
+                    }
+                } catch (error) {
+                    addLog(`MetaMask 检查错误: ${error.message}`, 'error');
+                }
+            } else {
+                document.getElementById('metamaskStatus').innerHTML = '❌ 未安装';
+                document.getElementById('metamaskStatus').className = 'text-lg font-bold text-red-400';
+                addLog('MetaMask: 未安装', 'error');
+            }
+            
+            addLog('系统状态检查完成', 'debug');
+        }
+
+        // 验证合约
+        async function verifyContracts() {
+            if (!connected) {
+                addLog('请先连接 MetaMask', 'error');
+                return;
+            }
+            
+            addLog('开始验证合约地址...', 'debug');
+            
+            const contracts = {
+                'vaultCreation': getContractAddress('vaultCreation'),
+                'vaultInvestment': getContractAddress('vaultInvestment'), 
+                'dexSwap': getContractAddress('dexSwap'),
+                'dexLiquidity': getContractAddress('dexLiquidity')
+            };
+            
+            for (const [name, address] of Object.entries(contracts)) {
+                try {
+                    const code = await provider.getCode(address);
+                    if (code === '0x') {
+                        addLog(`${name}: ${address} - ❌ 不是合约地址`, 'warning');
+                    } else {
+                        addLog(`${name}: ${address} - ✅ 合约存在`, 'success');
+                    }
+                } catch (error) {
+                    addLog(`${name}: ${address} - ❌ 验证失败: ${error.message}`, 'error');
+                }
+            }
+            
+            addLog('合约验证完成', 'debug');
+        }
+
+        // Gas 估算
+        async function estimateGas() {
+            if (!connected) {
+                addLog('请先连接 MetaMask', 'error');
+                return;
+            }
+            
+            const projectName = document.getElementById('debugProjectName').value;
+            const creationFee = document.getElementById('debugCreationFee').value;
+            
+            addLog('开始 Gas 估算...', 'debug');
+            
+            try {
+                const tx = {
+                    to: getContractAddress('vaultCreation'),
+                    value: ethers.parseEther(creationFee),
+                    data: '0x' + btoa(JSON.stringify({
+                        name: projectName,
+                        category: 'Technology',
+                        goal: '100',
+                        duration: '30'
+                    })).split('').map(c => c.charCodeAt(0).toString(16).padStart(2, '0')).join('')
+                };
+                
+                const gasEstimate = await provider.estimateGas(tx);
+                addLog(`Gas 估算: ${gasEstimate.toString()} gas`, 'success');
+                
+                const gasPrice = await provider.getFeeData();
+                addLog(`Gas Price: ${ethers.formatUnits(gasPrice.gasPrice, 'gwei')} gwei`, 'info');
+                
+                const totalCost = ethers.formatEther(gasEstimate * gasPrice.gasPrice);
+                addLog(`总 Gas 费用: ${totalCost} ETH`, 'info');
+                
+                document.getElementById('debugGasLimit').value = (parseInt(gasEstimate.toString()) * 1.2).toFixed(0);
+                
+            } catch (error) {
+                addLog(`Gas 估算失败: ${error.message}`, 'error');
+                if (error.reason) {
+                    addLog(`错误原因: ${error.reason}`, 'error');
+                }
+                if (error.code) {
+                    addLog(`错误代码: ${error.code}`, 'error');
+                }
+            }
+        }
+
+        // 调试创建交易
+        async function debugCreateTransaction() {
+            if (!connected) {
+                addLog('请先连接 MetaMask', 'error');
+                return;
+            }
+            
+            const projectName = document.getElementById('debugProjectName').value;
+            const creationFee = document.getElementById('debugCreationFee').value;
+            const gasLimit = document.getElementById('debugGasLimit').value;
+            
+            addLog('开始调试创建项目交易...', 'debug');
+            addLog(`项目名称: ${projectName}`, 'info');
+            addLog(`创建费用: ${creationFee} ETH`, 'info');
+            addLog(`Gas 限制: ${gasLimit}`, 'info');
+            
+            try {
+                // 构建交易
+                const tx = {
+                    to: getContractAddress('vaultCreation'),
+                    value: ethers.parseEther(creationFee),
+                    gasLimit: gasLimit,
+                    data: '0x' + btoa(JSON.stringify({
+                        name: projectName,
+                        category: 'Technology',
+                        goal: '100',
+                        duration: '30'
+                    })).split('').map(c => c.charCodeAt(0).toString(16).padStart(2, '0')).join('')
+                };
+                
+                addLog(`目标合约: ${tx.to}`, 'info');
+                addLog(`交易价值: ${ethers.formatEther(tx.value)} ETH`, 'info');
+                addLog(`数据长度: ${tx.data.length} 字符`, 'info');
+                
+                addLog('发送交易到 MetaMask...', 'debug');
+                const transaction = await signer.sendTransaction(tx);
+                addLog(`交易已提交: ${transaction.hash}`, 'success');
+                
+                addLog('等待交易确认...', 'debug');
+                const receipt = await transaction.wait();
+                
+                if (receipt && receipt.status === 1) {
+                    addLog(`✅ 交易成功! 区块: ${receipt.blockNumber}`, 'success');
+                    addLog(`Gas 使用: ${receipt.gasUsed.toString()}`, 'info');
+                    addLog(`实际费用: ${ethers.formatEther(receipt.gasUsed * receipt.gasPrice || 0)} ETH`, 'info');
+                } else {
+                    addLog(`❌ 交易失败! 状态: ${receipt.status}`, 'error');
+                }
+                
+            } catch (error) {
+                addLog(`❌ 交易执行失败: ${error.message}`, 'error');
+                
+                if (error.code === 4001) {
+                    addLog('用户取消了交易', 'warning');
+                } else if (error.code === 'INSUFFICIENT_FUNDS') {
+                    addLog('余额不足以支付交易费用', 'error');
+                } else if (error.code === -32000) {
+                    addLog('交易会失败 - 请检查合约地址和参数', 'error');
+                } else if (error.reason) {
+                    addLog(`失败原因: ${error.reason}`, 'error');
+                }
+                
+                if (error.transaction) {
+                    addLog(`交易详情: ${JSON.stringify(error.transaction, null, 2)}`, 'debug');
+                }
+            }
+        }
+
+        // 事件监听器
+        document.getElementById('checkSystemBtn').addEventListener('click', checkSystemStatus);
+        document.getElementById('verifyContractsBtn').addEventListener('click', verifyContracts);
+        document.getElementById('estimateGasBtn').addEventListener('click', estimateGas);
+        document.getElementById('debugCreateBtn').addEventListener('click', debugCreateTransaction);
+
+        // 页面加载时执行
+        document.addEventListener('DOMContentLoaded', function() {
+            addLog('调试工具初始化完成', 'debug');
+            checkSystemStatus();
+        });
+    </script>
+</body>
+</html>

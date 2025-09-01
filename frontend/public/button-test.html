@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔘 CryptoVault 按钮测试</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/ethers@6.4.0/dist/ethers.umd.min.js"></script>
+    <script src="config.js"></script>
+    <style>
+        body { font-family: 'Arial', sans-serif; }
+        .gradient-bg { background: linear-gradient(135deg, #0f0f23 0%, #1a1a40 50%, #2d1b69 100%); }
+        .glass-effect { backdrop-filter: blur(16px); background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .test-result { margin: 5px 0; padding: 10px; border-radius: 8px; }
+        .test-pass { background: rgba(34, 197, 94, 0.2); border: 1px solid rgba(34, 197, 94, 0.5); }
+        .test-fail { background: rgba(239, 68, 68, 0.2); border: 1px solid rgba(239, 68, 68, 0.5); }
+    </style>
+</head>
+<body class="gradient-bg min-h-screen text-white">
+    <!-- Navigation -->
+    <nav class="p-6 border-b border-white/10">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-4">
+                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                    <span class="text-white font-bold text-xl">🔘</span>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-bold">按钮测试工具</h1>
+                    <p class="text-sm text-gray-400">CryptoVault Button Test</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center space-x-6">
+                <nav class="hidden md:flex items-center space-x-6">
+                    <a href="app.html" class="text-gray-300 hover:text-white transition-colors">🏠 Home</a>
+                    <a href="vault.html" class="text-gray-300 hover:text-white transition-colors">🏦 Vaults</a>
+                    <a href="dex.html" class="text-gray-300 hover:text-white transition-colors">📈 DEX</a>
+                    <a href="button-test.html" class="text-cyan-400 border-b-2 border-cyan-400 pb-1">🔘 Button Test</a>
+                </nav>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-6xl mx-auto p-6">
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold mb-4">🔘 CryptoVault 按钮测试</h1>
+            <p class="text-gray-300">验证所有按钮的点击响应和 MetaMask 交互</p>
+        </div>
+
+        <!-- 连接状态 -->
+        <div class="glass-effect rounded-2xl p-6 mb-8">
+            <h2 class="text-2xl font-bold mb-4">📡 MetaMask 连接状态</h2>
+            <div class="flex items-center justify-between">
+                <div>
+                    <div id="connectionStatus" class="text-lg">❌ 未连接</div>
+                    <div id="accountInfo" class="text-sm text-gray-400">请先连接 MetaMask</div>
+                </div>
+                <button id="connectBtn" class="bg-orange-500 hover:bg-orange-600 px-6 py-3 rounded-xl font-medium transition-all">
+                    🦊 连接 MetaMask
+                </button>
+            </div>
+        </div>
+
+        <!-- 按钮测试区域 -->
+        <div class="grid lg:grid-cols-2 gap-8">
+            <!-- 投资按钮测试 -->
+            <div class="glass-effect rounded-2xl p-6">
+                <h3 class="text-2xl font-bold mb-4">💰 投资按钮测试</h3>
+                
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm text-gray-300 mb-2">投资金额 (ETH)</label>
+                        <input type="number" id="investAmount" value="0.01" step="0.001" min="0.001" 
+                               class="w-full bg-black/30 border border-gray-600 rounded-lg px-4 py-3 text-white">
+                    </div>
+                    
+                    <button id="testInvestBtn" class="w-full bg-gradient-to-r from-cyan-500 to-blue-500 py-3 rounded-xl font-bold text-lg hover:shadow-2xl transition-all">
+                        🔒 测试投资按钮 (MetaMask 弹窗)
+                    </button>
+                    
+                    <div id="investResult" class="min-h-[100px] bg-black/20 rounded-lg p-4 text-sm">
+                        <div class="text-gray-400">点击上方按钮开始测试...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 捐款按钮测试 -->
+            <div class="glass-effect rounded-2xl p-6">
+                <h3 class="text-2xl font-bold mb-4">💝 捐款按钮测试</h3>
+                
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm text-gray-300 mb-2">捐款金额 (ETH)</label>
+                        <input type="number" id="donateAmount" value="0.01" step="0.001" min="0.001" 
+                               class="w-full bg-black/30 border border-gray-600 rounded-lg px-4 py-3 text-white">
+                    </div>
+                    
+                    <button id="testDonateBtn" class="w-full bg-gradient-to-r from-green-500 to-emerald-500 py-3 rounded-xl font-bold text-lg hover:shadow-2xl transition-all">
+                        💝 测试捐款按钮 (MetaMask 弹窗)
+                    </button>
+                    
+                    <div id="donateResult" class="min-h-[100px] bg-black/20 rounded-lg p-4 text-sm">
+                        <div class="text-gray-400">点击上方按钮开始测试...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 创建项目按钮测试 -->
+            <div class="glass-effect rounded-2xl p-6 lg:col-span-2">
+                <h3 class="text-2xl font-bold mb-4">🚀 创建项目按钮测试</h3>
+                
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm text-gray-300 mb-2">项目名称</label>
+                            <input type="text" id="projectName" value="测试项目" 
+                                   class="w-full bg-black/30 border border-gray-600 rounded-lg px-4 py-3 text-white">
+                        </div>
+                        <div>
+                            <label class="block text-sm text-gray-300 mb-2">项目描述</label>
+                            <textarea id="projectDesc" rows="3" 
+                                      class="w-full bg-black/30 border border-gray-600 rounded-lg px-4 py-3 text-white">这是一个用于测试按钮功能的项目</textarea>
+                        </div>
+                        <div>
+                            <label class="block text-sm text-gray-300 mb-2">融资目标 (ETH)</label>
+                            <input type="number" id="projectGoal" value="10" step="0.1" min="0.1" 
+                                   class="w-full bg-black/30 border border-gray-600 rounded-lg px-4 py-3 text-white">
+                        </div>
+                        
+                        <button id="testCreateBtn" class="w-full bg-gradient-to-r from-purple-500 to-pink-500 py-3 rounded-xl font-bold text-lg hover:shadow-2xl transition-all">
+                            🚀 测试创建项目 (MetaMask 弹窗)
+                        </button>
+                    </div>
+                    
+                    <div>
+                        <h4 class="text-lg font-semibold mb-3">测试结果:</h4>
+                        <div id="createResult" class="min-h-[200px] bg-black/20 rounded-lg p-4 text-sm">
+                            <div class="text-gray-400">填写项目信息后点击创建按钮...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 测试总结 -->
+        <div class="glass-effect rounded-2xl p-6 mt-8">
+            <h3 class="text-2xl font-bold mb-4">📊 测试总结</h3>
+            <div id="testSummary" class="space-y-2">
+                <div class="text-gray-400">尚未开始测试...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let provider, signer, connected = false;
+        let userAccount = '';
+        let testResults = {
+            connect: false,
+            invest: false,
+            donate: false,
+            create: false
+        };
+
+        // 日志函数
+        function addLog(containerId, message, type = 'info') {
+            const container = document.getElementById(containerId);
+            const timestamp = new Date().toLocaleTimeString();
+            const colors = {
+                info: 'text-blue-300',
+                success: 'text-green-400',
+                warning: 'text-yellow-400',
+                error: 'text-red-400'
+            };
+            
+            const logEntry = document.createElement('div');
+            logEntry.className = colors[type] || 'text-white';
+            logEntry.innerHTML = `<span class="text-gray-400">[${timestamp}]</span> ${message}`;
+            
+            if (container.children.length === 1 && container.children[0].classList.contains('text-gray-400')) {
+                container.innerHTML = '';
+            }
+            
+            container.appendChild(logEntry);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        // 更新测试总结
+        function updateSummary() {
+            const summary = document.getElementById('testSummary');
+            const total = Object.keys(testResults).length;
+            const passed = Object.values(testResults).filter(r => r).length;
+            
+            summary.innerHTML = `
+                <div class="text-lg font-semibold">测试进度: ${passed}/${total}</div>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+                    <div class="test-result ${testResults.connect ? 'test-pass' : 'test-fail'}">
+                        <div class="font-semibold">🦊 MetaMask 连接</div>
+                        <div class="text-sm">${testResults.connect ? '✅ 通过' : '❌ 未测试'}</div>
+                    </div>
+                    <div class="test-result ${testResults.invest ? 'test-pass' : 'test-fail'}">
+                        <div class="font-semibold">💰 投资功能</div>
+                        <div class="text-sm">${testResults.invest ? '✅ 通过' : '❌ 未测试'}</div>
+                    </div>
+                    <div class="test-result ${testResults.donate ? 'test-pass' : 'test-fail'}">
+                        <div class="font-semibold">💝 捐款功能</div>
+                        <div class="text-sm">${testResults.donate ? '✅ 通过' : '❌ 未测试'}</div>
+                    </div>
+                    <div class="test-result ${testResults.create ? 'test-pass' : 'test-fail'}">
+                        <div class="font-semibold">🚀 创建项目</div>
+                        <div class="text-sm">${testResults.create ? '✅ 通过' : '❌ 未测试'}</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 连接 MetaMask
+        document.getElementById('connectBtn').addEventListener('click', async function() {
+            const originalText = this.textContent;
+            this.textContent = '连接中...';
+            this.disabled = true;
+            
+            try {
+                if (typeof window.ethereum === 'undefined') {
+                    throw new Error('请先安装 MetaMask 扩展');
+                }
+
+                const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                provider = new ethers.BrowserProvider(window.ethereum);
+                signer = await provider.getSigner();
+                userAccount = accounts[0];
+                
+                // 切换到 Sepolia
+                try {
+                    await window.ethereum.request({
+                        method: 'wallet_switchEthereumChain',
+                        params: [{ chainId: '0xaa36a7' }]
+                    });
+                } catch (switchError) {
+                    if (switchError.code === 4902) {
+                        await window.ethereum.request({
+                            method: 'wallet_addEthereumChain',
+                            params: [{
+                                chainId: '0xaa36a7',
+                                chainName: 'Sepolia Testnet',
+                                nativeCurrency: { name: 'SepoliaETH', symbol: 'ETH', decimals: 18 },
+                                rpcUrls: ['https://sepolia.infura.io/v3/'],
+                                blockExplorerUrls: ['https://sepolia.etherscan.io']
+                            }]
+                        });
+                    }
+                }
+                
+                connected = true;
+                testResults.connect = true;
+                updateConnectionStatus();
+                updateSummary();
+                
+            } catch (error) {
+                document.getElementById('connectionStatus').innerHTML = `❌ 连接失败: ${error.message}`;
+                testResults.connect = false;
+            } finally {
+                this.textContent = originalText;
+                this.disabled = false;
+            }
+        });
+
+        function updateConnectionStatus() {
+            if (connected) {
+                const shortAccount = userAccount.slice(0, 6) + '...' + userAccount.slice(-4);
+                document.getElementById('connectionStatus').innerHTML = `✅ 已连接`;
+                document.getElementById('accountInfo').innerHTML = `账户: ${shortAccount}`;
+                document.getElementById('connectBtn').innerHTML = '🔗 已连接';
+                document.getElementById('connectBtn').className = 'bg-green-500 hover:bg-green-600 px-6 py-3 rounded-xl font-medium transition-all';
+            }
+        }
+
+        // 测试投资按钮
+        document.getElementById('testInvestBtn').addEventListener('click', async function() {
+            if (!connected) {
+                addLog('investResult', '❌ 请先连接 MetaMask', 'error');
+                return;
+            }
+
+            const amount = document.getElementById('investAmount').value;
+            addLog('investResult', `🔄 开始测试投资 ${amount} ETH...`, 'info');
+            
+            const originalText = this.textContent;
+            this.textContent = '测试中...';
+            this.disabled = true;
+
+            try {
+                const tx = {
+                    to: userAccount, // Self-transfer as demo - follows dapp12 pattern
+                    value: ethers.parseEther(amount),
+                    gasLimit: 21000
+                };
+
+                addLog('investResult', '🦊 MetaMask 弹窗应该已经出现...', 'warning');
+                const transaction = await signer.sendTransaction(tx);
+                addLog('investResult', `✅ 投资交易已提交! Hash: ${transaction.hash}`, 'success');
+                
+                const receipt = await transaction.wait();
+                if (receipt && receipt.status === 1) {
+                    addLog('investResult', `🎉 投资按钮测试成功! 区块: ${receipt.blockNumber}`, 'success');
+                    testResults.invest = true;
+                } else {
+                    addLog('investResult', `❌ 交易失败，状态: ${receipt.status}`, 'error');
+                }
+                
+            } catch (error) {
+                if (error.code === 4001) {
+                    addLog('investResult', '❌ 用户取消了交易', 'warning');
+                } else {
+                    addLog('investResult', `❌ 投资测试失败: ${error.message}`, 'error');
+                }
+            } finally {
+                this.textContent = originalText;
+                this.disabled = false;
+                updateSummary();
+            }
+        });
+
+        // 测试捐款按钮
+        document.getElementById('testDonateBtn').addEventListener('click', async function() {
+            if (!connected) {
+                addLog('donateResult', '❌ 请先连接 MetaMask', 'error');
+                return;
+            }
+
+            const amount = document.getElementById('donateAmount').value;
+            addLog('donateResult', `🔄 开始测试捐款 ${amount} ETH...`, 'info');
+            
+            const originalText = this.textContent;
+            this.textContent = '测试中...';
+            this.disabled = true;
+
+            try {
+                const tx = {
+                    to: userAccount, // Self-transfer as demo - follows dapp12 pattern
+                    value: ethers.parseEther(amount),
+                    gasLimit: 21000
+                };
+
+                addLog('donateResult', '🦊 MetaMask 弹窗应该已经出现...', 'warning');
+                const transaction = await signer.sendTransaction(tx);
+                addLog('donateResult', `✅ 捐款交易已提交! Hash: ${transaction.hash}`, 'success');
+                
+                const receipt = await transaction.wait();
+                if (receipt && receipt.status === 1) {
+                    addLog('donateResult', `🎉 捐款按钮测试成功! 区块: ${receipt.blockNumber}`, 'success');
+                    testResults.donate = true;
+                } else {
+                    addLog('donateResult', `❌ 交易失败，状态: ${receipt.status}`, 'error');
+                }
+                
+            } catch (error) {
+                if (error.code === 4001) {
+                    addLog('donateResult', '❌ 用户取消了交易', 'warning');
+                } else {
+                    addLog('donateResult', `❌ 捐款测试失败: ${error.message}`, 'error');
+                }
+            } finally {
+                this.textContent = originalText;
+                this.disabled = false;
+                updateSummary();
+            }
+        });
+
+        // 测试创建项目按钮
+        document.getElementById('testCreateBtn').addEventListener('click', async function() {
+            if (!connected) {
+                addLog('createResult', '❌ 请先连接 MetaMask', 'error');
+                return;
+            }
+
+            const projectName = document.getElementById('projectName').value;
+            const projectDesc = document.getElementById('projectDesc').value;
+            const projectGoal = document.getElementById('projectGoal').value;
+
+            if (!projectName.trim()) {
+                addLog('createResult', '❌ 请输入项目名称', 'error');
+                return;
+            }
+
+            addLog('createResult', `🔄 开始测试创建项目 "${projectName}"...`, 'info');
+            
+            const originalText = this.textContent;
+            this.textContent = '测试中...';
+            this.disabled = true;
+
+            try {
+                const tx = {
+                    to: userAccount, // Self-transfer as demo - follows dapp12 pattern
+                    value: ethers.parseEther('0.001'),
+                    gasLimit: 21000
+                };
+
+                addLog('createResult', '🦊 MetaMask 弹窗应该已经出现...', 'warning');
+                const transaction = await signer.sendTransaction(tx);
+                addLog('createResult', `✅ 项目创建交易已提交! Hash: ${transaction.hash}`, 'success');
+                
+                const receipt = await transaction.wait();
+                if (receipt && receipt.status === 1) {
+                    addLog('createResult', `🎉 创建项目按钮测试成功! 区块: ${receipt.blockNumber}`, 'success');
+                    addLog('createResult', `📊 项目信息: ${projectName} - ${projectGoal} ETH 目标`, 'info');
+                    testResults.create = true;
+                } else {
+                    addLog('createResult', `❌ 交易失败，状态: ${receipt.status}`, 'error');
+                }
+                
+            } catch (error) {
+                if (error.code === 4001) {
+                    addLog('createResult', '❌ 用户取消了交易', 'warning');
+                } else {
+                    addLog('createResult', `❌ 创建项目测试失败: ${error.message}`, 'error');
+                }
+            } finally {
+                this.textContent = originalText;
+                this.disabled = false;
+                updateSummary();
+            }
+        });
+
+        // 页面加载完成
+        document.addEventListener('DOMContentLoaded', function() {
+            updateSummary();
+        });
+    </script>
+</body>
+</html>

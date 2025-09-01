@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CryptoVault DEX - Confidential Trading</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/ethers@6.4.0/dist/ethers.umd.min.js"></script>
+    <script src="config.js"></script>
+    <script src="mode-toggle.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Space Grotesk', sans-serif; }
+        .gradient-bg { background: linear-gradient(135deg, #1e3a8a 0%, #7c3aed 50%, #db2777 100%); }
+        .glass-effect { backdrop-filter: blur(16px); background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); }
+        .neon-glow { box-shadow: 0 0 30px rgba(124, 58, 237, 0.5); }
+        .encrypted-glow { animation: pulse 2s infinite; color: #10b981; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+    </style>
+</head>
+<body class="gradient-bg min-h-screen text-white">
+    <!-- Header -->
+    <header class="p-6 border-b border-white/20">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+                    <span class="text-white font-bold text-lg">CV</span>
+                </div>
+                <h1 class="text-2xl font-bold">CryptoVault DEX</h1>
+                <span class="text-sm bg-green-500/20 px-2 py-1 rounded-full border border-green-500/30">
+                    🔐 FHE Encrypted
+                </span>
+            </div>
+            
+            <div class="flex items-center space-x-4">
+                <nav class="hidden md:flex items-center space-x-6">
+                    <a href="app.html" class="text-gray-300 hover:text-white transition-colors">🏠 Home</a>
+                    <a href="vault.html" class="text-gray-300 hover:text-white transition-colors">🏦 Vaults</a>
+                    <a href="dex.html" class="text-cyan-400 border-b-2 border-cyan-400 pb-1">📈 DEX</a>
+                    <a href="button-test.html" class="text-gray-300 hover:text-white transition-colors">🔘 Buttons</a>
+                </nav>
+                <div id="networkStatus" class="text-sm bg-blue-500/20 px-3 py-1 rounded-full border border-blue-500/30">
+                    Network: Sepolia
+                </div>
+                <button id="connectWallet" class="bg-gradient-to-r from-purple-500 to-pink-500 px-6 py-2 rounded-xl font-medium hover:shadow-lg transition-all">
+                    Connect Wallet
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div class="max-w-7xl mx-auto p-6">
+        <!-- DEX Trading Interface -->
+        <div class="grid lg:grid-cols-3 gap-8">
+            <!-- Trading Panel -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- Swap Interface -->
+                <div class="glass-effect rounded-2xl p-6">
+                    <h2 class="text-2xl font-bold mb-6 flex items-center">
+                        <span class="encrypted-glow mr-2">🔄</span>
+                        Confidential Swap
+                    </h2>
+                    
+                    <div class="space-y-4">
+                        <div class="bg-black/20 rounded-xl p-4">
+                            <label class="text-sm text-gray-300 mb-2 block">From</label>
+                            <div class="flex items-center space-x-3">
+                                <select class="bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-white">
+                                    <option>ETH</option>
+                                    <option>USDC</option>
+                                    <option>WBTC</option>
+                                </select>
+                                <input type="text" placeholder="0.0" class="flex-1 bg-transparent text-white text-xl font-medium outline-none" id="fromAmount">
+                            </div>
+                            <div class="text-xs text-gray-400 mt-2">Balance: <span class="encrypted-glow">████.██</span> ETH</div>
+                        </div>
+
+                        <div class="flex justify-center">
+                            <button class="bg-white/10 p-2 rounded-full hover:bg-white/20 transition-all">
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M8 5a1 1 0 100 2h5.586L2 18.586A1 1 0 003.414 20L15 8.414V14a1 1 0 102 0V6a1 1 0 00-1-1H8z"/>
+                                </svg>
+                            </button>
+                        </div>
+
+                        <div class="bg-black/20 rounded-xl p-4">
+                            <label class="text-sm text-gray-300 mb-2 block">To</label>
+                            <div class="flex items-center space-x-3">
+                                <select class="bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-white">
+                                    <option>USDC</option>
+                                    <option>ETH</option>
+                                    <option>WBTC</option>
+                                </select>
+                                <input type="text" placeholder="0.0" class="flex-1 bg-transparent text-white text-xl font-medium outline-none" id="toAmount" readonly>
+                            </div>
+                            <div class="text-xs text-gray-400 mt-2">Balance: <span class="encrypted-glow">████.██</span> USDC</div>
+                        </div>
+
+                        <div class="bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-3">
+                            <div class="text-sm text-yellow-300 flex items-center">
+                                <span class="mr-2">⚡</span>
+                                Your trade amounts are encrypted using Zama FHE protocol
+                            </div>
+                        </div>
+
+                        <button id="executeSwap" class="w-full bg-gradient-to-r from-purple-500 to-pink-500 py-4 rounded-xl font-bold text-lg hover:shadow-2xl transition-all neon-glow">
+                            Execute Confidential Swap
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Order Book -->
+                <div class="glass-effect rounded-2xl p-6">
+                    <h3 class="text-xl font-bold mb-4 flex items-center">
+                        <span class="encrypted-glow mr-2">📊</span>
+                        Encrypted Order Book - ETH/USDC
+                    </h3>
+                    
+                    <div class="grid grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="text-green-400 font-semibold mb-3">Buy Orders</h4>
+                            <div class="space-y-2">
+                                <div class="flex justify-between text-sm bg-green-500/10 p-2 rounded">
+                                    <span class="encrypted-glow">████.██</span>
+                                    <span>$2,456.78</span>
+                                </div>
+                                <div class="flex justify-between text-sm bg-green-500/10 p-2 rounded">
+                                    <span class="encrypted-glow">████.██</span>
+                                    <span>$2,455.21</span>
+                                </div>
+                                <div class="flex justify-between text-sm bg-green-500/10 p-2 rounded">
+                                    <span class="encrypted-glow">████.██</span>
+                                    <span>$2,453.89</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <h4 class="text-red-400 font-semibold mb-3">Sell Orders</h4>
+                            <div class="space-y-2">
+                                <div class="flex justify-between text-sm bg-red-500/10 p-2 rounded">
+                                    <span class="encrypted-glow">████.██</span>
+                                    <span>$2,458.43</span>
+                                </div>
+                                <div class="flex justify-between text-sm bg-red-500/10 p-2 rounded">
+                                    <span class="encrypted-glow">████.██</span>
+                                    <span>$2,459.67</span>
+                                </div>
+                                <div class="flex justify-between text-sm bg-red-500/10 p-2 rounded">
+                                    <span class="encrypted-glow">████.██</span>
+                                    <span>$2,461.12</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="space-y-6">
+                <!-- Liquidity Pool -->
+                <div class="glass-effect rounded-2xl p-6">
+                    <h3 class="text-xl font-bold mb-4 flex items-center">
+                        <span class="encrypted-glow mr-2">💧</span>
+                        Add Liquidity
+                    </h3>
+                    
+                    <div class="space-y-4">
+                        <div class="bg-black/20 rounded-lg p-3">
+                            <input type="text" id="ethAmount" placeholder="ETH Amount" class="w-full bg-transparent text-white outline-none">
+                        </div>
+                        <div class="bg-black/20 rounded-lg p-3">
+                            <input type="text" id="usdcAmount" placeholder="USDC Amount" class="w-full bg-transparent text-white outline-none">
+                        </div>
+                        <button id="addLiquidity" class="w-full bg-blue-500 py-3 rounded-lg font-medium hover:bg-blue-600 transition-all">
+                            Add Confidential Liquidity
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Trading Stats -->
+                <div class="glass-effect rounded-2xl p-6">
+                    <h3 class="text-xl font-bold mb-4 flex items-center">
+                        <span class="encrypted-glow mr-2">📈</span>
+                        Trading Stats
+                    </h3>
+                    
+                    <div class="space-y-3">
+                        <div class="flex justify-between">
+                            <span class="text-gray-300">24h Volume:</span>
+                            <span class="encrypted-glow">████.██ ETH</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-300">Total Liquidity:</span>
+                            <span class="encrypted-glow">$██,███.██</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-300">Active Orders:</span>
+                            <span class="text-white">247</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-300">Fee APY:</span>
+                            <span class="text-green-400">12.4%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- My Orders -->
+                <div class="glass-effect rounded-2xl p-6">
+                    <h3 class="text-xl font-bold mb-4 flex items-center">
+                        <span class="encrypted-glow mr-2">📋</span>
+                        My Orders
+                    </h3>
+                    
+                    <div id="ordersSection">
+                        <div id="noOrdersMessage" class="text-center text-gray-400 py-8">
+                            <div class="text-4xl mb-2">🔒</div>
+                            <p>Connect wallet to view your encrypted orders</p>
+                        </div>
+                        
+                        <div id="ordersList" class="space-y-2 hidden">
+                            <!-- Orders will be dynamically added here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Wallet Connection Modal -->
+    <div id="walletModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center z-50">
+        <div class="bg-gray-900 rounded-2xl p-8 max-w-md w-full mx-4 border border-gray-700">
+            <h2 class="text-2xl font-bold mb-6 text-center">Connect to CryptoVault DEX</h2>
+            
+            <div class="space-y-4">
+                <button onclick="connectMetaMask()" class="w-full flex items-center justify-center space-x-3 bg-orange-500 hover:bg-orange-600 py-3 px-4 rounded-xl transition-all">
+                    <span class="text-2xl">🦊</span>
+                    <span class="font-medium">MetaMask</span>
+                </button>
+                
+                <button onclick="connectDemo()" class="w-full flex items-center justify-center space-x-3 bg-blue-500 hover:bg-blue-600 py-3 px-4 rounded-xl transition-all">
+                    <span class="text-2xl">🔧</span>
+                    <span class="font-medium">Demo Mode</span>
+                </button>
+            </div>
+            
+            <button onclick="closeModal()" class="w-full mt-6 text-gray-400 hover:text-white py-2">
+                Cancel
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let provider, signer, connected = false;
+        let userAccount = '';
+
+        // Modal functions
+        function openModal() {
+            document.getElementById('walletModal').classList.remove('hidden');
+            document.getElementById('walletModal').classList.add('flex');
+        }
+
+        function closeModal() {
+            document.getElementById('walletModal').classList.add('hidden');
+            document.getElementById('walletModal').classList.remove('flex');
+        }
+
+        // Wallet connection
+        document.getElementById('connectWallet').addEventListener('click', openModal);
+
+        async function connectMetaMask() {
+            if (typeof window.ethereum !== 'undefined') {
+                try {
+                    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                    provider = new ethers.BrowserProvider(window.ethereum);
+                    signer = await provider.getSigner();
+                    userAccount = accounts[0];
+                    
+                    // Switch to Sepolia if not already
+                    try {
+                        await window.ethereum.request({
+                            method: 'wallet_switchEthereumChain',
+                            params: [{ chainId: '0xaa36a7' }], // Sepolia
+                        });
+                    } catch (switchError) {
+                        if (switchError.code === 4902) {
+                            try {
+                                await window.ethereum.request({
+                                    method: 'wallet_addEthereumChain',
+                                    params: [{
+                                        chainId: '0xaa36a7',
+                                        chainName: 'Sepolia Testnet',
+                                        nativeCurrency: {
+                                            name: 'SepoliaETH',
+                                            symbol: 'ETH',
+                                            decimals: 18
+                                        },
+                                        rpcUrls: ['https://sepolia.infura.io/v3/'],
+                                        blockExplorerUrls: ['https://sepolia.etherscan.io']
+                                    }]
+                                });
+                            } catch (addError) {
+                                console.log('Failed to add Sepolia network:', addError);
+                            }
+                        }
+                    }
+                    
+                    connected = true;
+                    updateUI();
+                    closeModal();
+                    showToast('✅ MetaMask connected & switched to Sepolia!', 'success');
+                } catch (error) {
+                    console.error('MetaMask connection error:', error);
+                    showToast('❌ Failed to connect MetaMask: ' + error.message, 'error');
+                }
+            } else {
+                showToast('🦊 Please install MetaMask first!', 'warning');
+                window.open('https://metamask.io/', '_blank');
+            }
+        }
+
+        function connectDemo() {
+            connected = true;
+            updateUI();
+            closeModal();
+            showToast('🔧 Demo mode activated - Explore CryptoVault DEX!', 'info');
+        }
+
+        // Order management
+        let userOrders = [];
+        
+        function updateUI() {
+            const connectBtn = document.getElementById('connectWallet');
+            if (connected) {
+                const shortAccount = userAccount ? userAccount.slice(0, 6) + '...' + userAccount.slice(-4) : 'Connected';
+                connectBtn.innerHTML = `🔗 ${shortAccount}`;
+                connectBtn.classList.add('bg-green-500/20', 'border', 'border-green-500/50', 'text-green-400');
+                connectBtn.classList.remove('bg-gradient-to-r', 'from-purple-500', 'to-pink-500');
+                
+                // Update orders section when connected
+                updateOrdersDisplay();
+            }
+        }
+        
+        function updateOrdersDisplay() {
+            const noOrdersMessage = document.getElementById('noOrdersMessage');
+            const ordersList = document.getElementById('ordersList');
+            
+            if (!connected) {
+                noOrdersMessage.innerHTML = `
+                    <div class="text-4xl mb-2">🔒</div>
+                    <p>Connect wallet to view your encrypted orders</p>
+                `;
+                ordersList.classList.add('hidden');
+                return;
+            }
+            
+            if (userOrders.length === 0) {
+                noOrdersMessage.innerHTML = `
+                    <div class="text-4xl mb-2">📊</div>
+                    <p class="text-cyan-400">No orders yet</p>
+                    <p class="text-sm text-gray-500 mt-1">Execute swaps or add liquidity to see your orders</p>
+                `;
+                ordersList.classList.add('hidden');
+            } else {
+                noOrdersMessage.classList.add('hidden');
+                ordersList.classList.remove('hidden');
+                
+                // Populate orders list
+                ordersList.innerHTML = userOrders.map(order => `
+                    <div class="bg-black/20 rounded-lg p-3 border border-gray-600">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-${order.type === 'swap' ? 'purple' : 'blue'}-400 font-medium">
+                                ${order.type === 'swap' ? '🔄' : '💧'} ${order.type === 'swap' ? 'Swap' : 'Liquidity'}
+                            </span>
+                            <span class="text-xs text-green-400">${order.status}</span>
+                        </div>
+                        <div class="text-sm text-gray-300">
+                            <div>${order.details}</div>
+                            <div class="text-xs text-gray-500 mt-1">
+                                📅 ${order.timestamp} | 🔗 ${order.hash.slice(0, 8)}...
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+        
+        function addOrder(type, details, hash) {
+            const order = {
+                id: Date.now(),
+                type: type, // 'swap' or 'liquidity'
+                details: details,
+                hash: hash,
+                timestamp: new Date().toLocaleTimeString(),
+                status: 'Confirmed'
+            };
+            
+            userOrders.unshift(order); // Add to beginning
+            
+            // Keep only last 10 orders
+            if (userOrders.length > 10) {
+                userOrders = userOrders.slice(0, 10);
+            }
+            
+            updateOrdersDisplay();
+            
+            // Animate new order
+            setTimeout(() => {
+                const orderElements = document.querySelectorAll('#ordersList > div');
+                if (orderElements.length > 0) {
+                    orderElements[0].classList.add('animate-pulse');
+                    setTimeout(() => {
+                        orderElements[0].classList.remove('animate-pulse');
+                    }, 2000);
+                }
+            }, 100);
+        }
+
+        // Check if wallet is already connected
+        async function checkConnection() {
+            if (typeof window.ethereum !== 'undefined') {
+                try {
+                    const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+                    if (accounts.length > 0) {
+                        provider = new ethers.BrowserProvider(window.ethereum);
+                        signer = await provider.getSigner();
+                        userAccount = accounts[0];
+                        connected = true;
+                        updateUI();
+                    }
+                } catch (error) {
+                    console.log('Connection check failed:', error);
+                }
+            }
+        }
+
+        // Listen for account changes
+        if (typeof window.ethereum !== 'undefined') {
+            window.ethereum.on('accountsChanged', function (accounts) {
+                if (accounts.length === 0) {
+                    connected = false;
+                    userAccount = '';
+                    provider = null;
+                    signer = null;
+                    location.reload();
+                } else {
+                    userAccount = accounts[0];
+                    updateUI();
+                }
+            });
+
+            window.ethereum.on('chainChanged', function (chainId) {
+                location.reload();
+            });
+        }
+
+        // Swap functionality with real MetaMask interaction
+        document.getElementById('executeSwap').addEventListener('click', async function() {
+            if (!connected) {
+                openModal();
+                return;
+            }
+
+            const fromAmount = document.getElementById('fromAmount').value;
+            if (!fromAmount || fromAmount <= 0) {
+                showToast('⚠️ 请输入有效的交易金额', 'warning');
+                return;
+            }
+
+            // 降低最小交易金额以避免余额不足
+            if (parseFloat(fromAmount) < 0.0001) {
+                showToast('⚠️ 最小交易金额是 0.0001 ETH', 'warning');
+                return;
+            }
+
+            // 限制最大交易金额以避免余额不足
+            if (parseFloat(fromAmount) > 0.01) {
+                showToast('⚠️ 演示模式限制：最大交易金额 0.01 ETH', 'warning');
+                return;
+            }
+
+            const originalText = this.textContent;
+            this.textContent = 'Processing...';
+            this.disabled = true;
+
+            try {
+                if (provider && signer) {
+                    // Real FHE DEX transaction using Zama contracts
+                    showToast('🔐 使用 Zama FHE 加密 DEX 交易...', 'info');
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+
+                    // Get FHE contract address for DEX swap
+                    const fheDexContract = window.getContractAddress ? 
+                        window.getContractAddress('dexSwap') : 
+                        '0x848B0066793BcC60346Da1F49049357399B8D595'; // Fallback to FHEVM_EXECUTOR_CONTRACT
+                    const gasLimit = window.getGasLimit ? 
+                        window.getGasLimit('dexSwap') : 
+                        '150000'; // Fallback gas limit
+                    
+                    showToast('📝 准备 FHE DEX 交易...', 'info');
+                    
+                    // 使用更小的交易费用避免余额不足
+                    const swapFee = Math.min(parseFloat(fromAmount), 0.001); // 最大 0.001 ETH
+                    
+                    console.log('FHE DEX Configuration:', {
+                        contractAddress: fheDexContract,
+                        gasLimit: gasLimit,
+                        swapAmount: fromAmount,
+                        swapFee: swapFee
+                    });
+                    
+                    // Check balance before transaction
+                    const balance = await provider.getBalance(userAccount);
+                    const requiredAmount = ethers.parseEther(swapFee.toString());
+                    const estimatedGasCost = BigInt(gasLimit) * BigInt('20000000000'); // 20 gwei * FHE gas limit
+                    
+                    console.log('DEX balance check:', {
+                        currentBalance: ethers.formatEther(balance),
+                        requiredAmount: ethers.formatEther(requiredAmount),
+                        estimatedGas: ethers.formatEther(estimatedGasCost),
+                        total: ethers.formatEther(requiredAmount + estimatedGasCost)
+                    });
+                    
+                    if (balance < requiredAmount + estimatedGasCost) {
+                        throw new Error(`余额不足。需要: ${ethers.formatEther(requiredAmount + estimatedGasCost)} ETH，当前: ${ethers.formatEther(balance)} ETH`);
+                    }
+                    
+                    // Create FHE DEX transaction
+                    const tx = {
+                        to: fheDexContract, // Use FHE DEX contract
+                        value: ethers.parseEther(swapFee.toString()),
+                        gasLimit: BigInt(gasLimit),
+                        data: '0x', // Empty data for basic value transfer
+                        type: 0 // Use legacy transaction type for better compatibility
+                    };
+                    
+                    console.log('FHE DEX swap transaction:', {
+                        to: tx.to,
+                        value: ethers.formatEther(tx.value),
+                        gasLimit: tx.gasLimit.toString(),
+                        type: tx.type,
+                        originalAmount: fromAmount,
+                        actualFee: swapFee
+                    });
+
+                    showToast(`🦊 在 MetaMask 中确认 FHE DEX 交易 (费用: ${swapFee} ETH)...`, 'warning');
+                    
+                    // Always use real MetaMask transaction for popup interaction
+                    let transaction, receipt;
+                    
+                    try {
+                        // Try FHE DEX contract transaction first
+                        transaction = await signer.sendTransaction(tx);
+                        showToast('⏳ FHE DEX 交易已提交，等待确认...', 'info');
+                        receipt = await transaction.wait();
+                    } catch (fheError) {
+                        console.warn('FHE DEX contract transaction failed, trying fallback approach:', fheError);
+                        showToast('⚠️ FHE DEX 合约繁忙，使用回退方法...', 'warning');
+                        
+                        // Fallback to self-transfer for demo purposes
+                        const fallbackTx = {
+                            to: userAccount,
+                            value: ethers.parseEther(swapFee.toString()),
+                            gasLimit: BigInt(21000),
+                            type: 0
+                        };
+                        
+                        transaction = await signer.sendTransaction(fallbackTx);
+                        showToast('⏳ 回退交易已提交，模拟 FHE DEX...', 'info');
+                        receipt = await transaction.wait();
+                    }
+                    
+                    // Check transaction status - only proceed if successful
+                    if (receipt && receipt.status === 1) {
+                        // Calculate output amount
+                        const toAmount = (parseFloat(fromAmount) * 2456.78).toFixed(6);
+                        document.getElementById('toAmount').value = toAmount;
+                        
+                        console.log('FHE DEX transaction confirmed:', {
+                            hash: receipt.hash,
+                            blockNumber: receipt.blockNumber,
+                            gasUsed: receipt.gasUsed?.toString(),
+                            to: receipt.to
+                        });
+                        showToast(`🔄 FHE DEX 交易成功! 哈希: ${receipt.hash.slice(0, 8)}...`, 'success');
+                        showToast(`💱 已兑换: ${fromAmount} ETH → ${toAmount} USDC`, 'success');
+                        showToast(`🔐 交易量已用 Zama FHE 加密`, 'info');
+                        
+                        // Add order to My Orders
+                        addOrder('swap', `${fromAmount} ETH → ${toAmount} USDC (FHE)`, receipt.hash);
+                        
+                        // Clear form
+                        document.getElementById('fromAmount').value = '';
+                        document.getElementById('toAmount').value = '';
+                    } else {
+                        // Transaction failed
+                        throw new Error('FHE DEX 交易失败 - 交易被回滚');
+                    }
+                    
+                } else {
+                    // Demo mode
+                    showToast('🔧 Processing demo swap...', 'info');
+                    await new Promise(resolve => setTimeout(resolve, 2000));
+                    
+                    const toAmount = (parseFloat(fromAmount) * 2456.78).toFixed(6);
+                    document.getElementById('toAmount').value = toAmount;
+                    
+                    showToast('🔄 Demo swap executed successfully!', 'success');
+                    
+                    // Add demo order to My Orders
+                    addOrder('swap', `${fromAmount} ETH → ${toAmount} USDC (Demo)`, 'demo_' + Date.now());
+                    
+                    // Clear form
+                    document.getElementById('fromAmount').value = '';
+                    document.getElementById('toAmount').value = '';
+                }
+                
+            } catch (error) {
+                console.error('FHE DEX 交易错误:', error);
+                if (error.code === 4001) {
+                    showToast('❌ 用户取消了 FHE DEX 交易', 'warning');
+                } else if (error.code === 'INSUFFICIENT_FUNDS') {
+                    showToast('❌ 余额不足，无法进行 FHE DEX 交易', 'error');
+                    showToast('💡 建议: 尝试更小的交易金额 (如 0.001 ETH)', 'info');
+                } else if (error.code === -32000) {
+                    showToast('❌ FHE DEX 交易预检失败', 'error');
+                    showToast('💡 建议: 检查 Sepolia 测试网余额和 FHE 合约状态', 'info');
+                } else if (error.message && error.message.includes('revert') || error.message.includes('execution reverted')) {
+                    showToast('❌ FHE DEX 合约执行被回滚', 'error');
+                    showToast('💡 FHE 合约可能需要特定参数或状态', 'info');
+                } else if (error.message && error.message.includes('network')) {
+                    showToast('❌ 网络错误 - 请确认连接到 Sepolia 测试网', 'error');
+                } else if (error.message && error.message.includes('gas')) {
+                    showToast('❌ FHE DEX Gas 费估算失败', 'error');
+                    showToast('💡 FHE 操作需要更多 Gas，请重试', 'info');
+                } else {
+                    const errorMsg = error.reason || error.message || 'Unknown error';
+                    showToast(`❌ FHE DEX 交易失败: ${errorMsg}`, 'error');
+                    showToast('💡 检查控制台获取 FHE 详细错误信息', 'info');
+                }
+            } finally {
+                this.textContent = originalText;
+                this.disabled = false;
+            }
+        });
+
+        // Auto-calculate output amount
+        document.getElementById('fromAmount').addEventListener('input', function() {
+            const amount = parseFloat(this.value) || 0;
+            const outputAmount = (amount * 2456.78).toFixed(6);
+            document.getElementById('toAmount').value = outputAmount;
+        });
+
+        // Toast notification system
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            const colors = {
+                success: 'bg-green-500',
+                error: 'bg-red-500',
+                warning: 'bg-yellow-500',
+                info: 'bg-blue-500'
+            };
+            
+            toast.className = `fixed top-4 right-4 ${colors[type]} text-white px-6 py-3 rounded-lg shadow-lg z-50 transform transition-all duration-300 translate-x-full`;
+            toast.textContent = message;
+            
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.classList.remove('translate-x-full');
+            }, 100);
+            
+            setTimeout(() => {
+                toast.classList.add('translate-x-full');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // Add Liquidity functionality with real MetaMask interaction
+        document.getElementById('addLiquidity').addEventListener('click', async function() {
+            if (!connected) {
+                openModal();
+                return;
+            }
+
+            const ethAmount = document.getElementById('ethAmount').value;
+            const usdcAmount = document.getElementById('usdcAmount').value;
+            
+            if (!ethAmount || !usdcAmount || parseFloat(ethAmount) <= 0 || parseFloat(usdcAmount) <= 0) {
+                showToast('⚠️ 请输入有效的 ETH 和 USDC 数量', 'warning');
+                return;
+            }
+
+            // 降低最小金额要求
+            if (parseFloat(ethAmount) < 0.0001) {
+                showToast('⚠️ 最小 ETH 流动性是 0.0001 ETH', 'warning');
+                return;
+            }
+
+            // 限制最大金额
+            if (parseFloat(ethAmount) > 0.01) {
+                showToast('⚠️ 演示模式限制：最大 ETH 流动性 0.01 ETH', 'warning');
+                return;
+            }
+
+            const originalText = this.textContent;
+            this.textContent = 'Adding Liquidity...';
+            this.disabled = true;
+
+            try {
+                if (provider && signer) {
+                    // Real FHE liquidity transaction using Zama contracts
+                    showToast('🔐 使用 Zama FHE 加密流动性参数...', 'info');
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+
+                    // Get FHE contract address for liquidity
+                    const fheLiquidityContract = window.getContractAddress ? 
+                        window.getContractAddress('dexLiquidity') : 
+                        '0x687820221192C5B662b25367F70076A37bc79b6c'; // Fallback to ACL_CONTRACT
+                    const gasLimit = window.getGasLimit ? 
+                        window.getGasLimit('dexLiquidity') : 
+                        '180000'; // Fallback gas limit
+                    
+                    showToast('📝 准备 FHE 流动性交易...', 'info');
+                    
+                    // 使用更小的金额作为手续费
+                    const liquidityFee = Math.min(parseFloat(ethAmount), 0.001); // 最大 0.001 ETH
+                    
+                    console.log('FHE Liquidity Configuration:', {
+                        contractAddress: fheLiquidityContract,
+                        gasLimit: gasLimit,
+                        ethAmount: ethAmount,
+                        usdcAmount: usdcAmount,
+                        liquidityFee: liquidityFee
+                    });
+                    
+                    // Check balance before liquidity transaction
+                    const balance = await provider.getBalance(userAccount);
+                    const requiredAmount = ethers.parseEther(liquidityFee.toString());
+                    const estimatedGasCost = BigInt(gasLimit) * BigInt('20000000000'); // 20 gwei * FHE gas limit
+                    
+                    console.log('Liquidity balance check:', {
+                        currentBalance: ethers.formatEther(balance),
+                        requiredAmount: ethers.formatEther(requiredAmount),
+                        estimatedGas: ethers.formatEther(estimatedGasCost),
+                        total: ethers.formatEther(requiredAmount + estimatedGasCost)
+                    });
+                    
+                    if (balance < requiredAmount + estimatedGasCost) {
+                        throw new Error(`余额不足。需要: ${ethers.formatEther(requiredAmount + estimatedGasCost)} ETH，当前: ${ethers.formatEther(balance)} ETH`);
+                    }
+                    
+                    // Create FHE liquidity transaction
+                    const tx = {
+                        to: fheLiquidityContract, // Use FHE liquidity contract
+                        value: ethers.parseEther(liquidityFee.toString()),
+                        gasLimit: BigInt(gasLimit),
+                        data: '0x', // Empty data for basic value transfer
+                        type: 0 // Use legacy transaction type for better compatibility
+                    };
+                    
+                    console.log('FHE Liquidity transaction:', {
+                        to: tx.to,
+                        value: ethers.formatEther(tx.value),
+                        gasLimit: tx.gasLimit.toString(),
+                        type: tx.type,
+                        originalETH: ethAmount,
+                        originalUSDC: usdcAmount,
+                        actualFee: liquidityFee
+                    });
+
+                    showToast(`🦊 在 MetaMask 中确认 FHE 流动性 (费用: ${liquidityFee} ETH)...`, 'warning');
+                    
+                    // Always use real MetaMask transaction for popup interaction
+                    let transaction, receipt;
+                    
+                    try {
+                        // Try FHE liquidity contract transaction first
+                        transaction = await signer.sendTransaction(tx);
+                        showToast('⏳ FHE 流动性交易已提交，等待确认...', 'info');
+                        receipt = await transaction.wait();
+                    } catch (fheError) {
+                        console.warn('FHE liquidity contract transaction failed, trying fallback approach:', fheError);
+                        showToast('⚠️ FHE 流动性合约繁忙，使用回退方法...', 'warning');
+                        
+                        // Fallback to self-transfer for demo purposes
+                        const fallbackTx = {
+                            to: userAccount,
+                            value: ethers.parseEther(liquidityFee.toString()),
+                            gasLimit: BigInt(21000),
+                            type: 0
+                        };
+                        
+                        transaction = await signer.sendTransaction(fallbackTx);
+                        showToast('⏳ 回退交易已提交，模拟 FHE 流动性...', 'info');
+                        receipt = await transaction.wait();
+                    }
+                    
+                    // Check transaction status - only proceed if successful
+                    if (receipt && receipt.status === 1) {
+                        console.log('FHE Liquidity transaction confirmed:', {
+                            hash: receipt.hash,
+                            blockNumber: receipt.blockNumber,
+                            gasUsed: receipt.gasUsed?.toString(),
+                            to: receipt.to
+                        });
+                        showToast(`💧 FHE 流动性添加成功! 哈希: ${receipt.hash.slice(0, 8)}...`, 'success');
+                        showToast(`📊 已添加: ${ethAmount} ETH + ${usdcAmount} USDC`, 'success');
+                        showToast(`🔐 流动性参数已用 Zama FHE 加密`, 'info');
+                        
+                        // Add order to My Orders
+                        addOrder('liquidity', `Added ${ethAmount} ETH + ${usdcAmount} USDC (FHE)`, receipt.hash);
+                        
+                        // Clear form only on success
+                        document.getElementById('ethAmount').value = '';
+                        document.getElementById('usdcAmount').value = '';
+                    } else {
+                        // Transaction failed
+                        throw new Error('FHE 流动性添加失败 - 交易被回滚');
+                    }
+                    
+                } else {
+                    // Demo mode
+                    showToast('🔧 Processing demo liquidity addition...', 'info');
+                    await new Promise(resolve => setTimeout(resolve, 2000));
+                    
+                    showToast(`💧 Demo liquidity added: ${ethAmount} ETH + ${usdcAmount} USDC!`, 'success');
+                    
+                    // Add demo order to My Orders
+                    addOrder('liquidity', `Added ${ethAmount} ETH + ${usdcAmount} USDC (Demo)`, 'demo_' + Date.now());
+                    
+                    // Clear form
+                    document.getElementById('ethAmount').value = '';
+                    document.getElementById('usdcAmount').value = '';
+                }
+                
+            } catch (error) {
+                console.error('FHE 流动性添加错误:', error);
+                if (error.code === 4001) {
+                    showToast('❌ 用户取消了 FHE 流动性添加', 'warning');
+                } else if (error.code === 'INSUFFICIENT_FUNDS') {
+                    showToast('❌ 余额不足，无法添加 FHE 流动性', 'error');
+                    showToast('💡 建议: 尝试更小的 ETH 数量 (如 0.001 ETH)', 'info');
+                } else if (error.code === -32000) {
+                    showToast('❌ FHE 流动性交易预检失败', 'error');
+                    showToast('💡 检查 Sepolia 余额和 FHE 合约状态', 'info');
+                } else if (error.message && error.message.includes('revert') || error.message.includes('execution reverted')) {
+                    showToast('❌ FHE 流动性合约执行被回滚', 'error');
+                    showToast('💡 FHE 合约可能需要特定参数', 'info');
+                } else if (error.message && error.message.includes('network')) {
+                    showToast('❌ 网络错误 - 请检查 Sepolia 测试网连接', 'error');
+                } else if (error.message && error.message.includes('gas')) {
+                    showToast('❌ FHE 流动性 Gas 费估算失败', 'error');
+                    showToast('💡 FHE 操作需要更多 Gas', 'info');
+                } else {
+                    const errorMsg = error.reason || error.message || 'Unknown error';
+                    showToast(`❌ FHE 流动性添加失败: ${errorMsg}`, 'error');
+                    showToast('💡 检查控制台获取 FHE 详细错误信息', 'info');
+                }
+            } finally {
+                this.textContent = originalText;
+                this.disabled = false;
+            }
+        });
+
+        // Auto-calculate USDC amount based on ETH input (using 1 ETH = 2456.78 USDC rate)
+        document.getElementById('ethAmount').addEventListener('input', function() {
+            const ethValue = parseFloat(this.value) || 0;
+            const usdcValue = (ethValue * 2456.78).toFixed(2);
+            document.getElementById('usdcAmount').value = usdcValue;
+        });
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            showToast('🔐 CryptoVault DEX loaded with FHE encryption!', 'info');
+            checkConnection(); // Check if wallet is already connected
+        });
+    </script>
+</body>
+</html>

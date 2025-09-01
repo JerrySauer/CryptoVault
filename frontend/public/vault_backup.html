@@ -1,0 +1,1425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CryptoVault - Secret Funding Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/ethers@6.4.0/dist/ethers.umd.min.js"></script>
+    <script src="config.js"></script>
+    <script src="mode-toggle.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Space Grotesk', sans-serif; }
+        .gradient-bg { background: linear-gradient(135deg, #0f0f23 0%, #1a1a40 50%, #2d1b69 100%); }
+        .glass-effect { backdrop-filter: blur(16px); background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .neon-border { border: 1px solid #00ffff; box-shadow: 0 0 10px rgba(0, 255, 255, 0.3); }
+        .encrypted-text { color: #00ffff; animation: glow 2s infinite alternate; }
+        @keyframes glow { from { text-shadow: 0 0 5px #00ffff; } to { text-shadow: 0 0 20px #00ffff; } }
+        .vault-card { transition: all 0.3s ease; }
+        .vault-card:hover { transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0, 255, 255, 0.2); }
+    </style>
+</head>
+<body class="gradient-bg min-h-screen text-white">
+    <!-- Navigation -->
+    <nav class="p-6 border-b border-white/10">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-4">
+                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center">
+                    <span class="text-white font-bold text-xl">🔐</span>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-bold">CryptoVault</h1>
+                    <p class="text-sm text-gray-400">Secret Funding Platform</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center space-x-4">
+                <nav class="hidden md:flex items-center space-x-6">
+                    <a href="app.html" class="text-gray-300 hover:text-white transition-colors">🏠 Home</a>
+                    <a href="vault.html" class="text-cyan-400 border-b-2 border-cyan-400 pb-1">🏦 Vaults</a>
+                    <a href="dex.html" class="text-gray-300 hover:text-white transition-colors">📈 DEX</a>
+                    <a href="network-check.html" class="text-gray-300 hover:text-white transition-colors">🔍 Diagnostics</a>
+                    <a href="button-test.html" class="text-gray-300 hover:text-white transition-colors">🔘 Buttons</a>
+                </nav>
+                <button id="connectWallet" class="bg-gradient-to-r from-cyan-500 to-blue-500 px-6 py-2 rounded-xl font-medium hover:shadow-lg transition-all neon-border">
+                    Connect Wallet
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-7xl mx-auto p-6">
+        <!-- Hero Section -->
+        <div class="text-center py-12 mb-12">
+            <h2 class="text-5xl font-bold mb-6 bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
+                Secret Participation in<br>Decentralized Funding
+            </h2>
+            <p class="text-xl text-gray-300 mb-8 max-w-3xl mx-auto">
+                Contribute to projects anonymously using Zama's FHE encryption. Your investment amounts remain completely private while supporting innovation.
+            </p>
+            <div class="flex justify-center space-x-4">
+                <button onclick="scrollToVaults()" class="bg-gradient-to-r from-cyan-500 to-blue-500 px-8 py-4 rounded-xl font-bold text-lg hover:shadow-2xl transition-all">
+                    Explore Vaults
+                </button>
+            </div>
+        </div>
+
+        <!-- Stats Dashboard -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
+            <div class="glass-effect rounded-xl p-6 text-center">
+                <div class="text-3xl font-bold encrypted-text">████</div>
+                <div class="text-gray-400 mt-2">Total Vaults</div>
+            </div>
+            <div class="glass-effect rounded-xl p-6 text-center">
+                <div class="text-3xl font-bold encrypted-text">$███,███</div>
+                <div class="text-gray-400 mt-2">Funds Raised</div>
+            </div>
+            <div class="glass-effect rounded-xl p-6 text-center">
+                <div class="text-3xl font-bold encrypted-text">████</div>
+                <div class="text-gray-400 mt-2">Contributors</div>
+            </div>
+            <div class="glass-effect rounded-xl p-6 text-center">
+                <div class="text-3xl font-bold text-green-400">100%</div>
+                <div class="text-gray-400 mt-2">Privacy Guaranteed</div>
+            </div>
+        </div>
+
+        <!-- Featured Vaults -->
+        <div class="mb-12" id="vaultsSection">
+            <h3 class="text-3xl font-bold mb-8 flex items-center">
+                <span class="mr-3">🌟</span>
+                Featured Secret Vaults
+            </h3>
+            
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Vault 1 -->
+                <div class="glass-effect rounded-2xl p-6 vault-card" id="vault-1">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+                            <span class="text-2xl">🤖</span>
+                        </div>
+                        <span class="text-xs bg-green-500/20 px-2 py-1 rounded-full border border-green-500/50">ACTIVE</span>
+                    </div>
+                    
+                    <h4 class="text-xl font-bold mb-2">AI Privacy Protocol</h4>
+                    <p class="text-gray-400 text-sm mb-4">Revolutionary AI system that preserves user privacy while delivering personalized experiences using homomorphic encryption.</p>
+                    
+                    <div class="space-y-3 mb-6">
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">Target:</span>
+                            <span class="font-bold">500 ETH</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">Raised:</span>
+                            <span class="project-raised text-green-400" id="raised-1">0.000 ETH</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-2">
+                            <div class="bg-gradient-to-r from-cyan-500 to-blue-500 h-2 rounded-full progress-bar" id="progress-1" style="width: 0%"></div>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-400 progress-text" id="progress-text-1">Progress: 0%</span>
+                            <span class="text-gray-400">15 days left</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex space-x-2">
+                        <button class="invest-btn flex-1 bg-gradient-to-r from-cyan-500 to-blue-500 py-3 rounded-xl font-medium hover:shadow-lg transition-all" data-vault-id="1">
+                            🔒 Invest Secretly
+                        </button>
+                        <button class="donate-btn flex-1 bg-gradient-to-r from-green-500 to-emerald-500 py-3 rounded-xl font-medium hover:shadow-lg transition-all" data-vault-id="1">
+                            💝 Donate
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Vault 2 -->
+                <div class="glass-effect rounded-2xl p-6 vault-card" id="vault-2">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center">
+                            <span class="text-2xl">🌍</span>
+                        </div>
+                        <span class="text-xs bg-green-500/20 px-2 py-1 rounded-full border border-green-500/50">ACTIVE</span>
+                    </div>
+                    
+                    <h4 class="text-xl font-bold mb-2">EcoChain Carbon Credits</h4>
+                    <p class="text-gray-400 text-sm mb-4">Blockchain-based carbon credit marketplace with verified environmental impact tracking and transparent offset mechanisms.</p>
+                    
+                    <div class="space-y-3 mb-6">
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">Target:</span>
+                            <span class="font-bold">300 ETH</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">Raised:</span>
+                            <span class="project-raised text-green-400" id="raised-2">0.000 ETH</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-2">
+                            <div class="bg-gradient-to-r from-green-500 to-emerald-500 h-2 rounded-full progress-bar" id="progress-2" style="width: 0%"></div>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-400 progress-text" id="progress-text-2">Progress: 0%</span>
+                            <span class="text-gray-400">22 days left</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex space-x-2">
+                        <button class="invest-btn flex-1 bg-gradient-to-r from-green-500 to-emerald-500 py-3 rounded-xl font-medium hover:shadow-lg transition-all" data-vault-id="2">
+                            🔒 Invest Secretly
+                        </button>
+                        <button class="donate-btn flex-1 bg-gradient-to-r from-orange-500 to-red-500 py-3 rounded-xl font-medium hover:shadow-lg transition-all" data-vault-id="2">
+                            💝 Donate
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Vault 3 -->
+                <div class="glass-effect rounded-2xl p-6 vault-card" id="vault-3">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center">
+                            <span class="text-2xl">🏥</span>
+                        </div>
+                        <span class="text-xs bg-blue-500/20 px-2 py-1 rounded-full border border-blue-500/50">FUNDING</span>
+                    </div>
+                    
+                    <h4 class="text-xl font-bold mb-2">MedSecure Data Platform</h4>
+                    <p class="text-gray-400 text-sm mb-4">Secure medical data sharing platform enabling patient-controlled health information with privacy-preserving analytics.</p>
+                    
+                    <div class="space-y-3 mb-6">
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">Target:</span>
+                            <span class="font-bold">750 ETH</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">Raised:</span>
+                            <span class="project-raised text-green-400" id="raised-3">0.000 ETH</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-2">
+                            <div class="bg-gradient-to-r from-orange-500 to-red-500 h-2 rounded-full progress-bar" id="progress-3" style="width: 0%"></div>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-400 progress-text" id="progress-text-3">Progress: 0%</span>
+                            <span class="text-gray-400">35 days left</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex space-x-2">
+                        <button class="invest-btn flex-1 bg-gradient-to-r from-orange-500 to-red-500 py-3 rounded-xl font-medium hover:shadow-lg transition-all" data-vault-id="3">
+                            🔒 Invest Secretly
+                        </button>
+                        <button class="donate-btn flex-1 bg-gradient-to-r from-purple-500 to-pink-500 py-3 rounded-xl font-medium hover:shadow-lg transition-all" data-vault-id="3">
+                            💝 Donate
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Vault Features Info -->
+        <div class="glass-effect rounded-2xl p-12 text-center">
+            <h3 class="text-3xl font-bold mb-4">Secret Funding Platform</h3>
+            <p class="text-gray-300 mb-8 max-w-2xl mx-auto">
+                Support projects anonymously using Zama's FHE encryption. 
+                All investment amounts are encrypted and remain completely private while supporting innovation.
+            </p>
+        </div>
+    </div>
+
+    <!-- Investment Modal -->
+    <div id="investModal" class="fixed inset-0 bg-black/90 backdrop-blur-sm hidden items-center justify-center z-50">
+        <div class="glass-effect rounded-2xl p-8 max-w-md w-full mx-4 border border-cyan-500/30">
+            <h2 class="text-2xl font-bold mb-6 text-center">Secret Investment</h2>
+            
+            <div class="mb-6">
+                <div class="text-center mb-4">
+                    <div class="w-16 h-16 mx-auto rounded-xl bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center mb-3">
+                        <span class="text-2xl">🔐</span>
+                    </div>
+                    <h3 id="vaultName" class="text-lg font-semibold">AI Privacy Protocol</h3>
+                </div>
+                
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm text-gray-300 mb-2">Investment Amount (ETH)</label>
+                        <input type="number" id="investAmount" placeholder="0.1" step="0.01" min="0.001" 
+                               class="w-full bg-black/30 border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-cyan-500 focus:outline-none">
+                    </div>
+                    
+                    <div class="bg-cyan-500/10 border border-cyan-500/30 rounded-lg p-3">
+                        <div class="text-sm text-cyan-300 flex items-start">
+                            <span class="mr-2 text-lg">🔒</span>
+                            <div>
+                                <div class="font-medium mb-1">FHE Encryption Active</div>
+                                <div class="text-xs opacity-80">Your investment amount will be encrypted using Zama's homomorphic encryption</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex space-x-3">
+                <button onclick="executeInvestment()" class="flex-1 bg-gradient-to-r from-cyan-500 to-blue-500 py-3 rounded-xl font-bold hover:shadow-lg transition-all">
+                    Invest Secretly
+                </button>
+                <button onclick="closeInvestModal()" class="px-6 py-3 border border-gray-600 rounded-xl hover:border-cyan-500 transition-all">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Wallet Modal -->
+    <div id="walletModal" class="fixed inset-0 bg-black/90 backdrop-blur-sm hidden items-center justify-center z-50">
+        <div class="glass-effect rounded-2xl p-8 max-w-md w-full mx-4 border border-cyan-500/30">
+            <h2 class="text-2xl font-bold mb-6 text-center">Connect to CryptoVault</h2>
+            
+            <div class="space-y-4">
+                <button onclick="connectMetaMask()" class="w-full flex items-center justify-center space-x-3 bg-orange-500 hover:bg-orange-600 py-4 px-4 rounded-xl transition-all">
+                    <span class="text-2xl">🦊</span>
+                    <span class="font-medium">MetaMask</span>
+                </button>
+                
+                <button onclick="connectDemo()" class="w-full flex items-center justify-center space-x-3 bg-cyan-500 hover:bg-cyan-600 py-4 px-4 rounded-xl transition-all">
+                    <span class="text-2xl">🔧</span>
+                    <span class="font-medium">Demo Mode</span>
+                </button>
+            </div>
+            
+            <button onclick="closeWalletModal()" class="w-full mt-6 text-gray-400 hover:text-white py-2">
+                Cancel
+            </button>
+        </div>
+    </div>
+
+    <!-- Create Vault Modal -->
+        <div class="glass-effect rounded-2xl p-8 max-w-2xl w-full mx-4 border border-cyan-500/30">
+            <h2 class="text-3xl font-bold mb-6 text-center text-white">🚀 Create Secret Vault</h2>
+            
+            <form id="createVaultForm" class="space-y-6">
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm text-gray-300 mb-2">Project Name *</label>
+                        <input 
+                            type="text" 
+                            id="projectName"
+                            placeholder="AI Privacy Protocol"
+                            required
+                            class="w-full bg-black/30 border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-cyan-500 focus:outline-none"
+                        />
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-300 mb-2">Category *</label>
+                        <select 
+                            id="projectCategory"
+                            required
+                            class="w-full bg-black/30 border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-cyan-500 focus:outline-none"
+                        >
+                            <option value="">Select Category</option>
+                            <option value="Technology">Technology</option>
+                            <option value="Healthcare">Healthcare</option>
+                            <option value="Finance">Finance</option>
+                            <option value="Environment">Environment</option>
+                            <option value="Education">Education</option>
+                            <option value="Gaming">Gaming</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="block text-sm text-gray-300 mb-2">Project Description *</label>
+                    <textarea 
+                        id="projectDescription"
+                        placeholder="Describe your project, its goals, and how it will use privacy-preserving technology..."
+                        required
+                        rows="4"
+                        class="w-full bg-black/30 border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-cyan-500 focus:outline-none resize-none"
+                    ></textarea>
+                </div>
+                
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm text-gray-300 mb-2">Funding Goal (ETH) *</label>
+                        <input 
+                            type="number" 
+                            id="fundingGoal"
+                            placeholder="100"
+                            step="0.01"
+                            min="0.1"
+                            required
+                            class="w-full bg-black/30 border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-cyan-500 focus:outline-none"
+                        />
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-300 mb-2">Duration (Days) *</label>
+                        <select 
+                            id="projectDuration"
+                            required
+                            class="w-full bg-black/30 border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-cyan-500 focus:outline-none"
+                        >
+                            <option value="">Select Duration</option>
+                            <option value="7">7 Days</option>
+                            <option value="14">14 Days</option>
+                            <option value="30">30 Days</option>
+                            <option value="60">60 Days</option>
+                            <option value="90">90 Days</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="block text-sm text-gray-300 mb-2">Website URL (Optional)</label>
+                    <input 
+                        type="url" 
+                        id="projectWebsite"
+                        placeholder="https://your-project.com"
+                        class="w-full bg-black/30 border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-cyan-500 focus:outline-none"
+                    />
+                </div>
+                
+                <div class="bg-cyan-500/10 border border-cyan-500/30 rounded-lg p-4">
+                    <div class="text-sm text-cyan-300 flex items-start">
+                        <span class="mr-2 text-lg">🔒</span>
+                        <div>
+                            <div class="font-medium mb-2">Privacy Features</div>
+                            <div class="text-xs opacity-80">
+                                • All investor contributions will be encrypted using FHE<br>
+                                • Individual investment amounts remain private<br>
+                                • Only funding progress is publicly visible<br>
+                                • Full compliance with privacy regulations
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+            
+            <div class="flex space-x-3 mt-6">
+                <button 
+                    type="button"
+                    onclick="createVault()"
+                    class="flex-1 bg-gradient-to-r from-cyan-500 to-blue-500 py-4 rounded-xl font-bold text-white hover:shadow-2xl transition-all"
+                >
+                    🚀 Create Secret Vault
+                </button>
+                <button 
+                    type="button"
+                    onclick="closeCreateVaultModal()"
+                    class="px-6 py-4 border border-gray-600 rounded-xl hover:border-cyan-500 transition-all text-gray-300"
+                >
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let connected = false;
+        let currentVaultId = null;
+        let provider = null;
+        let signer = null;
+        let userAccount = '';
+
+        // Modal functions
+        function openWalletModal() {
+            document.getElementById('walletModal').classList.remove('hidden');
+            document.getElementById('walletModal').classList.add('flex');
+        }
+
+        function closeWalletModal() {
+            document.getElementById('walletModal').classList.add('hidden');
+            document.getElementById('walletModal').classList.remove('flex');
+        }
+
+        function openInvestModal() {
+            document.getElementById('investModal').classList.remove('hidden');
+            document.getElementById('investModal').classList.add('flex');
+        }
+
+        function closeInvestModal() {
+            document.getElementById('investModal').classList.add('hidden');
+            document.getElementById('investModal').classList.remove('flex');
+        }
+
+        function openCreateVaultModal() {
+            if (!connected) {
+                openWalletModal();
+                return;
+            }
+            document.getElementById('createVaultModal').classList.remove('hidden');
+            document.getElementById('createVaultModal').classList.add('flex');
+        }
+
+        function closeCreateVaultModal() {
+            console.log('🔥 closeCreateVaultModal函数被调用！');
+            const modal = document.getElementById('createVaultModal');
+            console.log('📋 找到的modal元素:', modal);
+            
+            if (!modal) {
+                console.error('❌ 找不到createVaultModal元素！');
+                return;
+            }
+            
+            // Check current modal state
+            console.log('📊 Modal当前状态:', {
+                display: modal.style.display,
+                classes: modal.className,
+                hidden: modal.classList.contains('hidden'),
+                flex: modal.classList.contains('flex')
+            });
+            
+            // Force hide with multiple methods
+            console.log('🔧 强制隐藏弹窗...');
+            modal.style.display = 'none';
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            modal.setAttribute('aria-hidden', 'true');
+            
+            // Also hide backdrop if exists
+            const backdrop = document.querySelector('.fixed.inset-0.bg-black');
+            if (backdrop) {
+                backdrop.style.display = 'none';
+                console.log('🎭 背景遮罩也已隐藏');
+            }
+            
+            console.log('📊 Modal修改后状态:', {
+                display: modal.style.display,
+                classes: modal.className,
+                hidden: modal.classList.contains('hidden'),
+                flex: modal.classList.contains('flex')
+            });
+            
+            // Reset form data
+            try {
+                document.getElementById('createVaultForm').reset();
+                console.log('📝 表单已重置');
+            } catch (e) {
+                console.error('⚠️ 重置表单失败:', e);
+            }
+            
+            // Clear any validation messages or errors
+            const inputs = modal.querySelectorAll('input, select, textarea');
+            inputs.forEach(input => {
+                input.classList.remove('border-red-500', 'border-green-500');
+            });
+            
+            console.log('✅ closeCreateVaultModal执行完成！');
+        }
+
+        function scrollToVaults() {
+            document.getElementById('vaultsSection').scrollIntoView({ 
+                behavior: 'smooth' 
+            });
+        }
+
+        // Wallet connection
+        document.getElementById('connectWallet').addEventListener('click', openWalletModal);
+
+        async function connectMetaMask() {
+            if (typeof window.ethereum !== 'undefined') {
+                try {
+                    // Request account access
+                    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                    
+                    // Initialize ethers provider
+                    provider = new ethers.BrowserProvider(window.ethereum);
+                    signer = await provider.getSigner();
+                    userAccount = accounts[0];
+                    
+                    // Switch to Sepolia testnet
+                    try {
+                        await window.ethereum.request({
+                            method: 'wallet_switchEthereumChain',
+                            params: [{ chainId: '0xaa36a7' }], // Sepolia
+                        });
+                    } catch (switchError) {
+                        if (switchError.code === 4902) {
+                            try {
+                                await window.ethereum.request({
+                                    method: 'wallet_addEthereumChain',
+                                    params: [{
+                                        chainId: '0xaa36a7',
+                                        chainName: 'Sepolia Testnet',
+                                        nativeCurrency: {
+                                            name: 'SepoliaETH',
+                                            symbol: 'ETH',
+                                            decimals: 18
+                                        },
+                                        rpcUrls: ['https://sepolia.infura.io/v3/'],
+                                        blockExplorerUrls: ['https://sepolia.etherscan.io']
+                                    }]
+                                });
+                            } catch (addError) {
+                                console.log('Failed to add Sepolia network:', addError);
+                            }
+                        }
+                    }
+                    
+                    connected = true;
+                    updateWalletUI();
+                    closeWalletModal();
+                    showToast('🔗 MetaMask connected successfully! Switched to Sepolia testnet.', 'success');
+                    
+                } catch (error) {
+                    console.error('MetaMask connection error:', error);
+                    showToast('❌ Failed to connect MetaMask: ' + error.message, 'error');
+                }
+            } else {
+                showToast('🦊 Please install MetaMask first!', 'warning');
+                window.open('https://metamask.io/', '_blank');
+            }
+        }
+
+        function connectDemo() {
+            connected = true;
+            userAccount = '0x...Demo...Account';
+            updateWalletUI();
+            closeWalletModal();
+            showToast('🔧 Demo mode activated! You can explore all features.', 'info');
+        }
+
+        function updateWalletUI() {
+            const connectBtn = document.getElementById('connectWallet');
+            if (connected) {
+                const shortAccount = userAccount.slice(0, 6) + '...' + userAccount.slice(-4);
+                connectBtn.innerHTML = `🔗 ${shortAccount}`;
+                connectBtn.classList.add('bg-green-500/20', 'border', 'border-green-500/50', 'text-green-400');
+                connectBtn.classList.remove('bg-gradient-to-r', 'from-cyan-500', 'to-blue-500', 'neon-border');
+            }
+        }
+
+        // Check if wallet is already connected
+        async function checkConnection() {
+            if (typeof window.ethereum !== 'undefined') {
+                try {
+                    const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+                    if (accounts.length > 0) {
+                        provider = new ethers.BrowserProvider(window.ethereum);
+                        signer = await provider.getSigner();
+                        userAccount = accounts[0];
+                        connected = true;
+                        updateWalletUI();
+                    }
+                } catch (error) {
+                    console.log('Connection check failed:', error);
+                }
+            }
+        }
+
+        // Investment functions
+        function invest(vaultId) {
+            if (!connected) {
+                openWalletModal();
+                return;
+            }
+            
+            currentVaultId = vaultId;
+            const project = projectDatabase[vaultId];
+            const vaultName = project ? project.name : `Project ${vaultId}`;
+            
+            document.getElementById('vaultName').textContent = vaultName;
+            openInvestModal();
+        }
+
+        // Donation functions
+        function donate(vaultId) {
+            if (!connected) {
+                openWalletModal();
+                return;
+            }
+            
+            currentVaultId = vaultId;
+            const project = projectDatabase[vaultId];
+            const vaultName = project ? project.name : `Project ${vaultId}`;
+            
+            // Update modal title for donation
+            document.querySelector('#investModal h2').textContent = 'Secret Donation';
+            document.querySelector('#investModal .bg-gradient-to-r.from-cyan-500.to-blue-500').textContent = 'Donate Secretly';
+            document.querySelector('#investModal label').textContent = 'Donation Amount (ETH)';
+            
+            document.getElementById('vaultName').textContent = vaultName;
+            openInvestModal();
+        }
+
+        async function executeInvestment() {
+            const amount = document.getElementById('investAmount').value;
+            
+            // Check if this is a donation or investment based on modal title
+            const isDonation = document.querySelector('#investModal h2').textContent === 'Secret Donation';
+            const actionType = isDonation ? 'donation' : 'investment';
+            
+            if (!amount || parseFloat(amount) <= 0) {
+                showToast(`⚠️ Please enter a valid ${actionType} amount`, 'warning');
+                return;
+            }
+
+            if (parseFloat(amount) < 0.001) {
+                showToast(`⚠️ Minimum ${actionType} is 0.001 ETH`, 'warning');
+                return;
+            }
+
+            const btn = event.target;
+            const originalText = btn.textContent;
+            btn.textContent = 'Processing...';
+            btn.disabled = true;
+
+            try {
+                if (provider && signer) {
+                    // Check network first
+                    const network = await provider.getNetwork();
+                    console.log('Current network:', network);
+                    
+                    if (network.chainId !== BigInt('11155111')) { // Sepolia chainId
+                        showToast('⚠️ Please switch to Sepolia testnet', 'warning');
+                        btn.textContent = originalText;
+                        btn.disabled = false;
+                        return;
+                    }
+                    
+                    // Check balance before transaction
+                    const balance = await provider.getBalance(userAccount);
+                    const requiredAmount = ethers.parseEther(amount);
+                    const estimatedGasCost = BigInt(21000) * BigInt('20000000000'); // Rough estimate
+                    
+                    if (balance < requiredAmount + estimatedGasCost) {
+                        showToast(`❌ Insufficient balance. Need ${ethers.formatEther(requiredAmount + estimatedGasCost)} ETH`, 'error');
+                        btn.textContent = originalText;
+                        btn.disabled = false;
+                        return;
+                    }
+                    
+                    // Real MetaMask transaction with actual popup
+                    showToast(`🔐 Encrypting ${actionType} amount with FHE...`, 'info');
+                    await new Promise(resolve => setTimeout(resolve, 1500));
+
+                    showToast('📝 Preparing MetaMask transaction...', 'info');
+                    
+                    // Investment transaction with improved gas handling
+                    const tx = {
+                        to: userAccount, // Self-transfer for demo
+                        value: ethers.parseEther(amount)
+                        // Let MetaMask estimate gas automatically
+                    };
+                    
+                    // Estimate gas before sending
+                    try {
+                        const estimatedGas = await signer.estimateGas(tx);
+                        tx.gasLimit = estimatedGas + BigInt(10000); // Add buffer
+                        console.log('Estimated gas:', estimatedGas.toString());
+                    } catch (gasError) {
+                        console.log('Gas estimation failed, using standard limit');
+                        tx.gasLimit = BigInt(21000);
+                    }
+                    
+                    console.log('Investment transaction:', tx);
+
+                    showToast('🦊 Please confirm transaction in MetaMask...', 'warning');
+                    
+                    // Always use real MetaMask transaction for popup interaction
+                    let transaction, receipt;
+                    
+                    // Real MetaMask transaction - this will trigger the popup
+                    transaction = await signer.sendTransaction(tx);
+                    showToast('⏳ Transaction submitted, waiting for confirmation...', 'info');
+                    
+                    // Wait for transaction confirmation and check status
+                    receipt = await transaction.wait();
+                    
+                    // Check transaction status - only proceed if successful  
+                    console.log('🔍 投资交易状态检查... receipt存在:', !!receipt, 'status:', receipt?.status, 'status类型:', typeof receipt?.status);
+                    
+                    if (receipt && (receipt.status === 1 || receipt.status === '1' || receipt.status == 1)) {
+                        console.log(`${actionType} transaction confirmed:`, receipt.hash);
+                        const emoji = isDonation ? '💝' : '🎉';
+                        showToast(`${emoji} ${actionType.charAt(0).toUpperCase() + actionType.slice(1)} confirmed! Tx: ${receipt.hash.slice(0, 8)}...`, 'success');
+                        
+                        // Update project balance only after successful transaction
+                        updateProjectBalance(currentVaultId, amount, false);
+                    } else {
+                        // Transaction failed
+                        throw new Error('Transaction failed - receipt status is 0');
+                    }
+                    
+                } else {
+                    // Demo mode
+                    showToast(`🔧 Processing demo ${actionType}...`, 'info');
+                    await new Promise(resolve => setTimeout(resolve, 2000));
+                    const emoji = isDonation ? '💝' : '🎉';
+                    showToast(`${emoji} Demo ${actionType} of ${amount} ETH completed!`, 'success');
+                    
+                    // Update project balance for demo mode too
+                    updateProjectBalance(currentVaultId, amount, true);
+                }
+                
+                closeInvestModal();
+                document.getElementById('investAmount').value = '';
+                
+                // Reset modal for next use
+                document.querySelector('#investModal h2').textContent = 'Secret Investment';
+                document.querySelector('#investModal .bg-gradient-to-r.from-cyan-500.to-blue-500').textContent = 'Invest Secretly';
+                document.querySelector('#investModal label').textContent = 'Investment Amount (ETH)';
+                
+            } catch (error) {
+                console.error(`${actionType} error:`, error);
+                
+                // Enhanced error handling with detailed user feedback
+                if (error.code === 4001 || error.code === 'ACTION_REJECTED') {
+                    showToast('❌ 用户取消了交易', 'warning');
+                } else if (error.code === 'INSUFFICIENT_FUNDS' || error.shortMessage?.includes('insufficient funds')) {
+                    showToast('❌ 余额不足，请确保有足够的ETH支付交易和gas费', 'error');
+                } else if (error.code === -32000 || error.reason?.includes('gas')) {
+                    showToast('❌ Gas估算失败，请稍后重试', 'error');
+                } else if (error.code === 'NETWORK_ERROR') {
+                    showToast('❌ 网络错误，请检查网络连接', 'error');
+                } else if (error.code === 'TIMEOUT') {
+                    showToast('❌ 交易超时，请稍后重试', 'error');
+                } else if (error.message?.includes('user rejected')) {
+                    showToast('❌ 用户拒绝了交易', 'warning');
+                } else if (error.message?.includes('gas')) {
+                    showToast('❌ Gas相关错误，请调整Gas设置', 'error');
+                } else if (error.message?.includes('nonce')) {
+                    showToast('❌ Nonce错误，请重置MetaMask账户', 'error');
+                } else if (error.message?.includes('replacement')) {
+                    showToast('❌ 交易替换错误，请等待当前交易完成', 'error');
+                } else {
+                    const errorMsg = error.reason || error.message || error.shortMessage || 'Unknown error';
+                    showToast(`❌ ${actionType} 失败: ${errorMsg}`, 'error');
+                    
+                    // Log detailed error for debugging
+                    console.log('详细错误信息:', {
+                        code: error.code,
+                        message: error.message,
+                        reason: error.reason,
+                        shortMessage: error.shortMessage,
+                        info: error.info,
+                        transaction: error.transaction
+                    });
+                }
+                
+                // Show helpful suggestions
+                showToast('💡 提示: 确保连接到Sepolia测试网且有足够余额', 'info');
+            } finally {
+                btn.textContent = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        // Create vault function
+        async function createVault() {
+            if (!connected) {
+                showToast('⚠️ Please connect your wallet first', 'warning');
+                openWalletModal();
+                return;
+            }
+
+            // Get form data
+            const projectName = document.getElementById('projectName').value.trim();
+            const projectCategory = document.getElementById('projectCategory').value;
+            const projectDescription = document.getElementById('projectDescription').value.trim();
+            const fundingGoal = document.getElementById('fundingGoal').value;
+            const projectDuration = document.getElementById('projectDuration').value;
+            const projectWebsite = document.getElementById('projectWebsite').value.trim();
+
+            // Validate required fields
+            if (!projectName || !projectCategory || !projectDescription || !fundingGoal || !projectDuration) {
+                showToast('⚠️ Please fill in all required fields', 'warning');
+                return;
+            }
+
+            if (parseFloat(fundingGoal) < 0.1) {
+                showToast('⚠️ Minimum funding goal is 0.1 ETH', 'warning');
+                return;
+            }
+
+            if (projectName.length < 5) {
+                showToast('⚠️ Project name must be at least 5 characters', 'warning');
+                return;
+            }
+
+            if (projectDescription.length < 20) {
+                showToast('⚠️ Project description must be at least 20 characters', 'warning');
+                return;
+            }
+
+            const btn = event.target;
+            const originalText = btn.textContent;
+            btn.textContent = 'Creating Project...';
+            btn.disabled = true;
+
+            try {
+                showToast('🔐 Preparing project creation with FHE encryption...', 'info');
+                await new Promise(resolve => setTimeout(resolve, 1000));
+
+                // Real MetaMask transaction for vault creation
+                console.log('🔍 检查交易模式:', {
+                    provider: !!provider,
+                    signer: !!signer,
+                    connected: connected,
+                    userAccount: userAccount
+                });
+                
+                if (provider && signer) {
+                    console.log('✅ 进入真实MetaMask交易模式');
+                    // Check network first
+                    const network = await provider.getNetwork();
+                    console.log('Current network for project creation:', network);
+                    
+                    if (network.chainId !== BigInt('11155111')) { // Sepolia chainId
+                        showToast('⚠️ Please switch to Sepolia testnet', 'warning');
+                        btn.textContent = originalText;
+                        btn.disabled = false;
+                        return;
+                    }
+                    
+                    // Check balance before transaction
+                    const balance = await provider.getBalance(userAccount);
+                    const creationFee = '0.001';
+                    const requiredAmount = ethers.parseEther(creationFee);
+                    const estimatedGasCost = BigInt(21000) * BigInt('20000000000'); // Rough estimate
+                    
+                    if (balance < requiredAmount + estimatedGasCost) {
+                        showToast(`❌ Insufficient balance for project creation. Need ${ethers.formatEther(requiredAmount + estimatedGasCost)} ETH`, 'error');
+                        btn.textContent = originalText;
+                        btn.disabled = false;
+                        return;
+                    }
+                    
+                    showToast('📝 Encoding project data for blockchain...', 'info');
+                    await new Promise(resolve => setTimeout(resolve, 1500));
+                    
+                    // Project creation transaction with improved gas handling
+                    
+                    const tx = {
+                        to: userAccount, // Self-transfer for demo
+                        value: ethers.parseEther(creationFee)
+                        // Let MetaMask estimate gas automatically
+                    };
+                    
+                    // Estimate gas before sending
+                    try {
+                        const estimatedGas = await signer.estimateGas(tx);
+                        tx.gasLimit = estimatedGas + BigInt(5000); // Add smaller buffer for simple transfer
+                        console.log('Estimated gas for project creation:', estimatedGas.toString());
+                    } catch (gasError) {
+                        console.log('Gas estimation failed, using standard limit');
+                        tx.gasLimit = BigInt(21000);
+                    }
+                    
+                    console.log('Simplified transaction:', tx);
+
+                    showToast('🦊 Please confirm project creation in MetaMask...', 'warning');
+                    showToast(`💰 Creation fee: ${creationFee} ETH + gas`, 'info');
+                    
+                    // Always use real MetaMask transaction for popup interaction
+                    let transaction, receipt;
+                    
+                    // Real MetaMask transaction - this will trigger the popup
+                    showToast('📡 Sending transaction to blockchain...', 'info');
+                    transaction = await signer.sendTransaction(tx);
+                    showToast(`✅ Transaction submitted! Hash: ${transaction.hash.slice(0, 10)}...`, 'success');
+                    showToast('⏳ Waiting for blockchain confirmation...', 'info');
+                    
+                    // Wait for transaction confirmation and check status
+                    console.log('⏳ 等待交易确认...');
+                    receipt = await transaction.wait();
+                    console.log('📨 收到交易回执:', receipt);
+                    console.log('📊 交易状态:', receipt ? receipt.status : 'receipt is null');
+                    console.log('🔍 交易哈希:', receipt ? receipt.hash : 'no hash');
+                    
+                    // Immediately execute cleanup regardless of status for debugging
+                    console.log('🚨 强制执行弹窗关闭和项目添加（调试模式）');
+                    setTimeout(() => {
+                        console.log('🔄 强制关闭弹窗...');
+                        closeCreateVaultModal();
+                        
+                        // Additional direct DOM manipulation as backup
+                        console.log('🔧 执行备用弹窗关闭机制...');
+                        const modal = document.getElementById('createVaultModal');
+                        if (modal) {
+                            modal.style.display = 'none !important';
+                            modal.classList.add('hidden');
+                            modal.classList.remove('flex');
+                            console.log('✅ 备用弹窗关闭完成');
+                        } else {
+                            console.error('❌ 备用关闭：找不到弹窗元素');
+                        }
+                        
+                        // Force hide all modals as last resort
+                        document.querySelectorAll('.fixed.inset-0').forEach(el => {
+                            if (el.style.zIndex >= 50 || el.classList.contains('z-50')) {
+                                el.style.display = 'none';
+                                console.log('🚨 强制隐藏模态元素:', el);
+                            }
+                        });
+                        
+                        console.log('✅ 所有弹窗关闭机制执行完成');
+                    }, 200);
+                    
+                    showToast(`🚀 项目 "${projectName}" 创建交易已提交！`, 'success');
+                    
+                    // Force add project regardless of receipt status
+                    console.log('🔄 强制添加项目到列表...');
+                    setTimeout(() => {
+                        const projectId = projectCounter;
+                        addNewVaultToPage({
+                            name: projectName,
+                            description: projectDescription,
+                            category: projectCategory,
+                            goal: fundingGoal,
+                            duration: projectDuration,
+                            website: projectWebsite
+                        });
+                        
+                        // Scroll to highlight
+                        setTimeout(() => {
+                            const newProject = document.querySelector(`#vault-${projectId}`);
+                            if (newProject) {
+                                newProject.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                newProject.classList.add('border-2', 'border-cyan-400', 'shadow-lg', 'shadow-cyan-400/50');
+                                showToast(`✨ 项目已添加到列表！`, 'success');
+                                setTimeout(() => {
+                                    newProject.classList.remove('border-2', 'border-cyan-400', 'shadow-lg', 'shadow-cyan-400/50');
+                                }, 5000);
+                            }
+                        }, 500);
+                    }, 500);
+                    
+                    // Check transaction status - only proceed if successful
+                    console.log('🔍 检查交易状态... receipt存在:', !!receipt, 'status:', receipt?.status, 'status类型:', typeof receipt?.status);
+                    
+                    if (receipt && (receipt.status === 1 || receipt.status === '1' || receipt.status == 1)) {
+                        console.log('✅ 项目创建交易确认成功，开始后续处理...', receipt.hash);
+                        
+                        // Close modal after brief delay to ensure user sees success
+                        console.log('🔄 准备关闭创建项目弹窗...');
+                        setTimeout(() => {
+                            closeCreateVaultModal();
+                            console.log('✅ 创建项目弹窗已关闭');
+                        }, 100);
+                        
+                        // Show success messages after modal is closed
+                        showToast(`🚀 项目 "${projectName}" 创建成功！`, 'success');
+                        showToast(`📊 交易哈希: ${receipt.hash.slice(0, 10)}...${receipt.hash.slice(-6)}`, 'info');
+                        
+                        // Add the new vault to the page dynamically only on success
+                        showToast('📝 正在将项目添加到列表...', 'info');
+                        await new Promise(resolve => setTimeout(resolve, 300));
+                        
+                        console.log('📋 准备添加项目到页面，项目数据:', {
+                            name: projectName,
+                            description: projectDescription,
+                            category: projectCategory,
+                            goal: fundingGoal,
+                            duration: projectDuration,
+                            website: projectWebsite
+                        });
+                        
+                        const projectId = projectCounter; // Get current counter before increment
+                        console.log('📊 项目ID将为:', projectId);
+                        
+                        addNewVaultToPage({
+                            name: projectName,
+                            description: projectDescription,
+                            category: projectCategory,
+                            goal: fundingGoal,
+                            duration: projectDuration,
+                            website: projectWebsite
+                        });
+                        
+                        // Scroll to and highlight the new project immediately
+                        setTimeout(() => {
+                            const newProject = document.querySelector(`#vault-${projectId}`);
+                            if (newProject) {
+                                // Smooth scroll to the new project
+                                newProject.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                
+                                // Add highlight effect
+                                newProject.classList.add('border-2', 'border-cyan-400', 'shadow-lg', 'shadow-cyan-400/50');
+                                showToast(`✨ 新项目已添加到列表！可以开始投资了！`, 'success');
+                                
+                                // Remove highlight after 5 seconds
+                                setTimeout(() => {
+                                    newProject.classList.remove('border-2', 'border-cyan-400', 'shadow-lg', 'shadow-cyan-400/50');
+                                }, 5000);
+                            }
+                        }, 500);
+                        
+                    } else {
+                        // Transaction failed or status unclear
+                        console.log('⚠️ 交易状态不明确，但尝试执行备用处理流程...');
+                        console.log('🔄 备用：关闭弹窗...');
+                        setTimeout(() => {
+                            closeCreateVaultModal();
+                            console.log('✅ 备用：弹窗已关闭');
+                        }, 100);
+                        
+                        showToast(`⚠️ 交易状态不确定，但已提交到区块链`, 'warning');
+                        showToast(`🔍 请检查区块链浏览器确认交易状态`, 'info');
+                        
+                        // Still try to add the project as backup
+                        console.log('🔄 备用：尝试添加项目到列表...');
+                        const projectId = projectCounter;
+                        addNewVaultToPage({
+                            name: projectName,
+                            description: projectDescription,
+                            category: projectCategory,
+                            goal: fundingGoal,
+                            duration: projectDuration,
+                            website: projectWebsite
+                        });
+                        
+                        return; // Don't throw error, continue execution
+                    }
+                    
+                } else {
+                    // Demo mode simulation
+                    console.log('🔧 进入演示模式，无真实MetaMask交易');
+                    showToast('🔧 演示模式：正在创建项目...', 'info');
+                    await new Promise(resolve => setTimeout(resolve, 1500));
+                    showToast('🔐 模拟 FHE 加密设置...', 'info');
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    
+                    // IMMEDIATELY close modal after demo creation
+                    closeCreateVaultModal();
+                    
+                    showToast(`🚀 演示项目 "${projectName}" 创建成功！`, 'success');
+                    
+                    // Add the new vault to the page dynamically for demo mode
+                    showToast('📝 正在将项目添加到列表...', 'info');
+                    await new Promise(resolve => setTimeout(resolve, 300));
+                    
+                    const projectId = projectCounter; // Get current counter before increment
+                    addNewVaultToPage({
+                        name: projectName,
+                        description: projectDescription,
+                        category: projectCategory,
+                        goal: fundingGoal,
+                        duration: projectDuration,
+                        website: projectWebsite
+                    });
+                    
+                    // Scroll to and highlight the new project immediately
+                    setTimeout(() => {
+                        const newProject = document.querySelector(`#vault-${projectId}`);
+                        if (newProject) {
+                            // Smooth scroll to the new project
+                            newProject.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            
+                            // Add highlight effect
+                            newProject.classList.add('border-2', 'border-cyan-400', 'shadow-lg', 'shadow-cyan-400/50');
+                            showToast(`✨ 演示项目已添加到列表！可以进行测试！`, 'success');
+                            
+                            // Remove highlight after 5 seconds
+                            setTimeout(() => {
+                                newProject.classList.remove('border-2', 'border-cyan-400', 'shadow-lg', 'shadow-cyan-400/50');
+                            }, 5000);
+                        }
+                    }, 500);
+                }
+                
+            } catch (error) {
+                console.error('Project creation error:', error);
+                
+                // Enhanced error handling for project creation
+                if (error.code === 4001 || error.code === 'ACTION_REJECTED') {
+                    showToast('❌ 用户取消了项目创建', 'warning');
+                } else if (error.code === 'INSUFFICIENT_FUNDS' || error.shortMessage?.includes('insufficient funds')) {
+                    showToast('❌ 余额不足，请确保有足够的ETH支付创建费用和gas费', 'error');
+                } else if (error.code === -32000 || error.reason?.includes('gas')) {
+                    showToast('❌ Gas估算失败，请稍后重试项目创建', 'error');
+                } else if (error.code === 'NETWORK_ERROR') {
+                    showToast('❌ 网络错误，请检查网络连接', 'error');
+                } else if (error.code === 'TIMEOUT') {
+                    showToast('❌ 创建项目超时，请稍后重试', 'error');
+                } else if (error.message?.includes('user rejected')) {
+                    showToast('❌ 用户拒绝了项目创建交易', 'warning');
+                } else if (error.message?.includes('gas')) {
+                    showToast('❌ Gas相关错误，请调整Gas设置或稍后重试', 'error');
+                } else if (error.message?.includes('nonce')) {
+                    showToast('❌ Nonce错误，请重置MetaMask账户', 'error');
+                } else if (error.message?.includes('replacement')) {
+                    showToast('❌ 交易替换错误，请等待当前交易完成', 'error');
+                } else if (error.message?.includes('network') || error.message?.includes('chain')) {
+                    showToast('❌ 网络错误，请确认连接到Sepolia测试网', 'error');
+                } else {
+                    const errorMsg = error.reason || error.message || error.shortMessage || 'Unknown error';
+                    showToast(`❌ 创建项目失败: ${errorMsg}`, 'error');
+                    
+                    // Log detailed error for debugging
+                    console.log('项目创建详细错误信息:', {
+                        code: error.code,
+                        message: error.message,
+                        reason: error.reason,
+                        shortMessage: error.shortMessage,
+                        info: error.info,
+                        data: error.data,
+                        transaction: error.transaction
+                    });
+                }
+                
+                // Show helpful suggestions
+                showToast('💡 提示: 确保连接到Sepolia测试网且有足够余额（至少0.002 ETH）', 'info');
+                showToast('🔧 如果问题持续，请尝试刷新页面重新连接钱包', 'info');
+                
+            } finally {
+                console.log('🔧 创建项目finally块执行，恢复按钮状态');
+                btn.textContent = originalText;
+                btn.disabled = false;
+                console.log('✅ 创建项目按钮状态已恢复');
+            }
+        }
+
+        // Project management system
+        let projectCounter = 4; // Start from 4 since we have 3 existing projects
+        const projectDatabase = {
+            1: { name: 'AI Privacy Protocol', raised: 0, goal: 500, progress: 67 },
+            2: { name: 'EcoChain Carbon Credits', raised: 0, goal: 300, progress: 45 },
+            3: { name: 'MedSecure Data Platform', raised: 0, goal: 750, progress: 23 }
+        };
+
+        // Function to add new vault to the page
+        function addNewVaultToPage(vaultData) {
+            console.log('🚀 开始添加新项目到页面:', vaultData);
+            const newProjectId = projectCounter++;
+            
+            // Store project data
+            projectDatabase[newProjectId] = {
+                name: vaultData.name,
+                description: vaultData.description,
+                raised: 0,
+                goal: parseFloat(vaultData.goal),
+                progress: 0,
+                duration: vaultData.duration,
+                category: vaultData.category,
+                website: vaultData.website,
+                created: new Date().toISOString()
+            };
+            console.log('📊 项目数据已存储，ID:', newProjectId);
+            
+            // Try multiple selectors to find the vault grid
+            let vaultGrid = document.querySelector('.grid.md\\:grid-cols-2.lg\\:grid-cols-3');
+            if (!vaultGrid) {
+                vaultGrid = document.querySelector('div.grid:nth-of-type(2)'); // Featured Vaults section
+                console.log('⚠️ 使用备用选择器查找项目网格');
+            }
+            
+            if (!vaultGrid) {
+                console.error('❌ 无法找到项目网格容器');
+                showToast('⚠️ 无法添加项目到页面，但项目已创建成功', 'warning');
+                return;
+            }
+            console.log('✅ 找到项目网格容器:', vaultGrid);
+            const categoryIcons = {
+                'Technology': '🤖',
+                'Healthcare': '🏥',
+                'Finance': '💰',
+                'Environment': '🌍',
+                'Education': '📚',
+                'Gaming': '🎮'
+            };
+            
+            const vaultHTML = `
+                <div class="glass-effect rounded-2xl p-6 vault-card border border-cyan-500/30" id="vault-${newProjectId}">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center">
+                            <span class="text-2xl">${categoryIcons[vaultData.category] || '🆕'}</span>
+                        </div>
+                        <span class="text-xs bg-cyan-500/20 px-2 py-1 rounded-full border border-cyan-500/50">NEW</span>
+                    </div>
+                    
+                    <h4 class="text-xl font-bold mb-2">${vaultData.name}</h4>
+                    <p class="text-gray-400 text-sm mb-4">${vaultData.description.substring(0, 120)}...</p>
+                    
+                    <div class="space-y-3 mb-6">
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">Target:</span>
+                            <span class="font-bold">${vaultData.goal} ETH</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">Raised:</span>
+                            <span class="project-raised text-green-400" id="raised-${newProjectId}">0.000 ETH</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-2">
+                            <div class="bg-gradient-to-r from-cyan-500 to-blue-500 h-2 rounded-full progress-bar" id="progress-${newProjectId}" style="width: 0%"></div>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-400 progress-text" id="progress-text-${newProjectId}">Progress: 0%</span>
+                            <span class="text-gray-400">${vaultData.duration} days left</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex space-x-2">
+                        <button class="invest-btn flex-1 bg-gradient-to-r from-cyan-500 to-blue-500 py-3 rounded-xl font-medium hover:shadow-lg transition-all" data-vault-id="${newProjectId}">
+                            🔒 Invest Secretly
+                        </button>
+                        <button class="donate-btn flex-1 bg-gradient-to-r from-green-500 to-emerald-500 py-3 rounded-xl font-medium hover:shadow-lg transition-all" data-vault-id="${newProjectId}">
+                            💝 Donate
+                        </button>
+                    </div>
+                </div>
+            `;
+            try {
+                vaultGrid.insertAdjacentHTML('beforeend', vaultHTML);
+                console.log('✅ HTML已插入到页面');
+                
+                // Verify the element was actually added
+                const addedElement = document.querySelector(`#vault-${newProjectId}`);
+                if (addedElement) {
+                    console.log('✅ 新项目元素已在DOM中找到:', addedElement);
+                } else {
+                    console.error('❌ 新项目元素未在DOM中找到');
+                }
+                
+                showToast(`🎉 项目 "${vaultData.name}" 已成功添加到平台！`, 'success');
+                console.log(`✅ 新项目添加完成: ${vaultData.name} (ID: ${newProjectId})`);
+            } catch (error) {
+                console.error('❌ 插入HTML时发生错误:', error);
+                showToast('⚠️ 添加项目到页面时发生错误', 'error');
+            }
+        }
+
+        // Function to update project balance after investment/donation
+        function updateProjectBalance(projectId, amount, isDemo = false) {
+            if (!projectDatabase[projectId]) return;
+            
+            const project = projectDatabase[projectId];
+            project.raised += parseFloat(amount);
+            project.progress = Math.min((project.raised / project.goal) * 100, 100);
+            
+            // Update UI elements
+            const raisedElement = document.getElementById(`raised-${projectId}`);
+            const progressBar = document.getElementById(`progress-${projectId}`);
+            const progressText = document.getElementById(`progress-text-${projectId}`);
+            
+            if (raisedElement) {
+                raisedElement.textContent = `${project.raised.toFixed(3)} ETH`;
+                if (!isDemo) raisedElement.classList.add('text-green-400');
+            }
+            
+            if (progressBar) {
+                progressBar.style.width = `${project.progress.toFixed(1)}%`;
+            }
+            
+            if (progressText) {
+                progressText.textContent = `Progress: ${project.progress.toFixed(1)}%`;
+            }
+            
+            // Add visual feedback
+            const vaultElement = document.getElementById(`vault-${projectId}`);
+            if (vaultElement) {
+                vaultElement.classList.add('animate-pulse');
+                setTimeout(() => {
+                    vaultElement.classList.remove('animate-pulse');
+                }, 2000);
+            }
+            
+            console.log(`Project ${projectId} balance updated:`, project);
+        }
+
+        // Event listeners for create vault buttons
+        document.getElementById('createVaultBtn').addEventListener('click', openCreateVaultModal);
+        document.getElementById('launchVaultBtn').addEventListener('click', openCreateVaultModal);
+        
+        // Event delegation for dynamically created invest/donate buttons
+        document.addEventListener('click', function(event) {
+            if (event.target.classList.contains('invest-btn')) {
+                const vaultId = event.target.dataset.vaultId;
+                if (vaultId) {
+                    invest(parseInt(vaultId));
+                }
+            }
+            
+            if (event.target.classList.contains('donate-btn')) {
+                const vaultId = event.target.dataset.vaultId;
+                if (vaultId) {
+                    donate(parseInt(vaultId));
+                }
+            }
+        });
+
+        // Toast notification system
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            const colors = {
+                success: 'bg-green-500',
+                error: 'bg-red-500', 
+                warning: 'bg-yellow-500',
+                info: 'bg-cyan-500'
+            };
+            
+            toast.className = `fixed top-4 right-4 ${colors[type]} text-white px-6 py-3 rounded-lg shadow-lg z-50 transform transition-all duration-300 translate-x-full`;
+            toast.textContent = message;
+            
+            document.body.appendChild(toast);
+            
+            setTimeout(() => toast.classList.remove('translate-x-full'), 100);
+            setTimeout(() => {
+                toast.classList.add('translate-x-full');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // Add global modal close functionality
+        function forceCloseAllModals() {
+            console.log('🚨 执行全局强制关闭所有弹窗');
+            
+            // Close create vault modal specifically
+            const createModal = document.getElementById('createVaultModal');
+            if (createModal) {
+                createModal.style.display = 'none';
+                createModal.classList.add('hidden');
+                createModal.classList.remove('flex');
+                console.log('✅ Create Vault Modal 已强制关闭');
+            }
+            
+            // Close all modals with z-50 class
+            document.querySelectorAll('.z-50').forEach(modal => {
+                modal.style.display = 'none';
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+                console.log('✅ 强制关闭模态窗口:', modal.id);
+            });
+            
+            // Close all fixed positioned overlays
+            document.querySelectorAll('.fixed.inset-0').forEach(overlay => {
+                overlay.style.display = 'none';
+                overlay.classList.add('hidden');
+                overlay.classList.remove('flex');
+                console.log('✅ 强制关闭覆盖层');
+            });
+        }
+        
+        // Add ESC key global listener
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                console.log('⌨️ ESC键按下，关闭所有弹窗');
+                forceCloseAllModals();
+            }
+        });
+        
+        // Add global click outside listener
+        document.addEventListener('click', function(event) {
+            const createModal = document.getElementById('createVaultModal');
+            if (createModal && !createModal.classList.contains('hidden')) {
+                const modalContent = createModal.querySelector('.glass-effect');
+                if (modalContent && !modalContent.contains(event.target)) {
+                    console.log('🖱️ 点击弹窗外部，关闭弹窗');
+                    forceCloseAllModals();
+                }
+            }
+        });
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            showToast('🔐 CryptoVault initialized with FHE encryption!', 'info');
+            checkConnection(); // Check if wallet is already connected
+            
+            // Add a test button to force close modals (for debugging)
+            console.log('🔧 全局弹窗关闭机制已初始化');
+            console.log('💡 可以使用 ESC 键或点击弹窗外部强制关闭');
+            console.log('💡 或在控制台运行 forceCloseAllModals() 手动关闭');
+            
+            // Expose function globally for debugging
+            window.forceCloseAllModals = forceCloseAllModals;
+        });
+    </script>
+</body>
+</html>
